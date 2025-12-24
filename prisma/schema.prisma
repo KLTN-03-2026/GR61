@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") 
+}
+
+enum VaiTro {
+  HocVien
+  Admin
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  hoTen       String
+  email       String?   @unique
+  sdt         String?   @unique
+  ngaySinh    DateTime?
+  password    String?
+  vaiTro      VaiTro
+  ngayTao     DateTime  @default(now())
+  ngayCapNhat DateTime  @updatedAt
+  
+  // Quan hệ 1-1
+  HocVien     HocVien?
+  Admin       Admin?
+}
+
+model HocVien {
+  id   Int  @id
+  User User @relation(fields: [id], references: [id])
+}
+
+model Admin {
+  id   Int  @id
+  User User @relation(fields: [id], references: [id])
+}
