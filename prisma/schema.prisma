@@ -1,11 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL") 
+  // Không đặt url ở đây nữa
 }
 
 enum VaiTro {
@@ -24,7 +23,6 @@ model User {
   ngayTao     DateTime  @default(now())
   ngayCapNhat DateTime  @updatedAt
   
-  // Quan hệ 1-1
   HocVien     HocVien?
   Admin       Admin?
 }

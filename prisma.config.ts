@@ -1,15 +1,18 @@
-import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+// prisma.config.ts
+import { defineConfig } from "@prisma/config";
+
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error(
+    "DATABASE_URL is not defined in your environment variables (.env)"
+  );
+}
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
-  // Đảm bảo đường dẫn migrations khớp với thư mục bạn đang làm việc
-  migrations: {
-    path: "prisma/migrations",
-  },
-  // 'classic' là lựa chọn an toàn cho MySQL local
-  engine: "classic", 
   datasource: {
-    url: env("DATABASE_URL"),
+    url: databaseUrl,
   },
+  // Đổi từ "library" thành "classic" để khớp với kiểu dữ liệu của Prisma 7
+  engine: "classic",
 });
