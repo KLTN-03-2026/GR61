@@ -1,18 +1,20 @@
-// "use client";
-// import { useLoginPage } from "@/lib/hooks/useLoginPage";
-// import { LoginForm } from "@/app/components/auth/LoginForm";
+// @/app/auth/login/page.tsx
+"use client";
 
-// export default function LoginPage() {
-//   const { formData, error, loading, handleChange, handleSubmit } =
-//     useLoginPage();
+import { LoginForm } from "./LoginForm";
+import { useLoginPage } from "./useLoginPage";
 
-//   return (
-//     <LoginForm
-//       formData={formData}
-//       error={error}
-//       loading={loading}
-//       onChange={handleChange}
-//       onSubmit={handleSubmit}
-//     />
-//   );
-// }
+export default function LoginPage() {
+  const { formData, error, loading, handleChange, handleSubmit } =
+    useLoginPage();
+
+  return (
+    <LoginForm
+      formData={formData}
+      error={error}
+      loading={loading}
+      onChange={handleChange}
+      onSubmit={handleSubmit}
+    />
+  );
+}

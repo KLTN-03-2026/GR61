@@ -1,106 +1,64 @@
-// "use client";
+// @/lib/hooks/useLoginPage.ts
+"use client";
 
-// import { useRouter } from "next/navigation";
-// import { useAxios } from "./useAxios";
-// import { useAuthStore } from "../stores/auth.store";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAxios } from "@/lib/hooks/useAxios";
+import { VaiTro } from "@prisma/client";
 
-// export function useLoginPage() {
-//   const router = useRouter();
-//   const { fetchData, loading } = useAxios<{
-//     message: string;
-//     vaiTro: "Admin" | "ToChuc" | "TinhNguyenVien";
-//     accessToken: string;
-//   }>();
-//   const { formData, error, setFormData, setError, setLoading } = useAuthStore();
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setFormData({ [e.target.name]: e.target.value });
-//     if (error) setError("");
-//   };
+// Định nghĩa kiểu dữ liệu trả về từ API
+interface LoginResponse {
+  message: string;
+  user: {
+    id: number;
+    hoTen: string;
+    email: string;
+    vaiTro: VaiTro;
+  };
+}
 
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
+export function useLoginPage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
 
-//     if (!formData.email || !formData.password) {
-//       setError("Vui lòng nhập đầy đủ thông tin");
-//       return;
-//     }
+  // Sử dụng hook useAxios với kiểu dữ liệu LoginResponse
+  const { fetchData, loading } = useAxios<LoginResponse>();
 
-//     try {
-//       setLoading(true);
-//       const res = await fetchData("POST", "/api/auth/login", formData);
-//       if (!res) return;
-//       localStorage.setItem("access_token", res.accessToken);
-//       alert(res?.message || "Đăng nhập thành công");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
+  };
 
-//       const role = res?.vaiTro;
-//       if (role === "Admin") router.push("/giaodien/admin");
-//       else if (role === "ToChuc") router.push("/giaodien/tochuc");
-//       else if (role === "TinhNguyenVien")
-//         router.push("/giaodien/tinhnguyenvien");
-//       else router.push("/giaodien/403");
-//     } catch {
-//       setError("Sai email hoặc mật khẩu");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-//   return { formData, error, loading, handleChange, handleSubmit };
-// }
+    if (!formData.email || !formData.password) {
+      setError("Vui lòng nhập đầy đủ email và mật khẩu");
+      return;
+    }
 
-// // "use client";
+    try {
+      // Gọi API đăng nhập
+      const res = await fetchData("POST", "/api/auth/login", formData);
 
-// // import { useState } from "react";
-// // import { useRouter } from "next/navigation";
-// // import { useAxios } from "./useAxios";
+      if (!res) return;
 
-// // interface LoginForm {
-// //   email: string;
-// //   password: string;
-// // }
+      // Token đã được set tự động vào Cookie từ Server, không cần localStorage
+      alert(res.message || "Đăng nhập thành công");
 
-// // export function useLoginPage() {
-// //   const [formData, setFormData] = useState<LoginForm>({
-// //     email: "",
-// //     password: "",
-// //   });
-// //   const [error, setError] = useState("");
-// //   const router = useRouter();
-// //   const { fetchData, loading } = useAxios<{
-// //     message: string;
-// //     vaiTro: "Admin" | "ToChuc" | "TinhNguyenVien";
-// //     accessToken: string;
-// //   }>();
+      // Điều hướng dựa trên vai trò trong Prisma 7 (Admin hoặc HocVien)
+      const role = res.user.vaiTro;
+      if (role === "Admin") {
+        router.push("/giaodien/admin");
+      } else {
+        router.push("/giaodien/hocvien");
+      }
+    } catch (err) {
+      setError("Email hoặc mật khẩu không chính xác");
+    }
+  };
 
-// //   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-// //     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-// //     if (error) setError("");
-// //   };
-
-// //   const handleSubmit = async (e: React.FormEvent) => {
-// //     e.preventDefault();
-
-// //     if (!formData.email || !formData.password) {
-// //       setError("Vui lòng nhập đầy đủ thông tin");
-// //       return;
-// //     }
-
-// //     try {
-// //       const res = await fetchData("POST", "/api/auth/login", formData);
-// //       if (!res) return;
-// //       localStorage.setItem("access_token", res.accessToken);
-// //       alert(res?.message || "Đăng nhập thành công");
-// //       const role = res?.vaiTro;
-
-// //       if (role === "Admin") router.push("/giaodien/admin");
-// //       else if (role === "ToChuc") router.push("/giaodien/tochuc");
-// //       else if (role === "TinhNguyenVien")
-// //         router.push("/giaodien/tinhnguyenvien");
-// //       else router.push("/giaodien/403");
-// //     } catch {
-// //       setError("Sai email hoặc mật khẩu");
-// //     }
-// //   };
-
-// //   return { formData, error, loading, handleChange, handleSubmit };
-// // }
+  return { formData, error, loading, handleChange, handleSubmit };
+}

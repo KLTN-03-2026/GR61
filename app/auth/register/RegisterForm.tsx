@@ -36,9 +36,9 @@ export function RegisterForm({
         className="absolute inset-0 w-full h-full object-cover opacity-90 fixed"
       />
 
-      <div className="relative z-10 flex items-center justify-center w-full min-h-full">
-        <div className="bg-[rgb(202,177,101)] bg-opacity-80 p-8 rounded-lg w-[450px] shadow-xl">
-          <h1 className="text-4xl font-bold text-white mb-3 text-center drop-shadow-md">
+      <div className="relative z-10 flex items-center justify-center w-full min-h-full mt-[-20px]">
+        <div className="bg-[rgb(237,215,148)] bg-opacity-80 p-8 rounded-lg w-[450px] shadow-xl">
+          <h1 className="text-5xl font-bold text-[rgb(163,138,60)] mb-3 text-center drop-shadow-md">
             Đăng ký
           </h1>
 
@@ -51,7 +51,9 @@ export function RegisterForm({
 
           <form onSubmit={onSubmit} className="flex flex-col gap-3">
             <div>
-              <label className="text-white text-sm ml-1">Họ và tên *</label>
+              <label className="text-[rgb(163,138,60)] text-sm ml-1">
+                Họ và tên *
+              </label>
               <input
                 type="text"
                 name="hoTen"
@@ -64,7 +66,9 @@ export function RegisterForm({
             </div>
 
             <div>
-              <label className="text-white text-sm ml-1">Email *</label>
+              <label className="text-[rgb(163,138,60)] text-sm ml-1">
+                Email *
+              </label>
               <input
                 type="email"
                 name="email"
@@ -78,7 +82,9 @@ export function RegisterForm({
 
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-white text-sm ml-1">Số điện thoại</label>
+                <label className="text-[rgb(163,138,60)] text-sm ml-1">
+                  Số điện thoại
+                </label>
                 <input
                   type="text"
                   name="sdt"
@@ -89,7 +95,9 @@ export function RegisterForm({
                 />
               </div>
               <div className="flex-1">
-                <label className="text-white text-sm ml-1">Ngày sinh</label>
+                <label className="text-[rgb(163,138,60)] text-sm ml-1">
+                  Ngày sinh
+                </label>
                 <input
                   type="date"
                   name="ngaySinh"
@@ -101,7 +109,9 @@ export function RegisterForm({
             </div>
 
             <div>
-              <label className="text-white text-sm ml-1">Mật khẩu *</label>
+              <label className="text-[rgb(163,138,60)] text-sm ml-1">
+                Mật khẩu *
+              </label>
               <input
                 type="password"
                 name="password"
@@ -116,7 +126,7 @@ export function RegisterForm({
             <button
               type="submit"
               disabled={loading}
-              className="mt-4 bg-[rgb(125,105,44)] hover:bg-[rgb(155,134,72)] text-white font-semibold py-3 rounded disabled:opacity-50 transition duration-200"
+              className="mt-4 bg-[rgb(183,156,76)] hover:bg-[rgb(155,134,72)] text-white font-semibold py-3 rounded disabled:opacity-50 transition duration-200"
             >
               {loading ? "Đang xử lý..." : "Đăng ký ngay"}
             </button>
@@ -125,7 +135,7 @@ export function RegisterForm({
           <p className="mt-6 text-black text-center text-sm">
             Đã có tài khoản?{" "}
             <a
-              className="text-white hover:underline hover:text-gray-200 font-bold"
+              className="text-[rgb(255,255,255)] hover:underline hover:text-gray-200 font-bold ml-3"
               href="/auth/login"
             >
               Đăng nhập ngay
