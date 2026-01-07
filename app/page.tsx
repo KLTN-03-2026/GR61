@@ -19,7 +19,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-[TimesNewRoman]">
-      {/* ================= HERO ================= */}
+      {/* mở đầu */}
       <section
         className="relative min-h-screen flex items-center justify-center px-8 bg-cover bg-center mb-3"
         style={{ backgroundImage: "url('/bg1.jpg')" }}

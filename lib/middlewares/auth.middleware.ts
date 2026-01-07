@@ -40,14 +40,14 @@ export async function authMiddleware(req: NextRequest) {
 
     // 3. RBAC: Kiểm tra quyền truy cập đường dẫn
     // Chặn nếu vào /admin mà không phải Admin
-    if (pathname.startsWith("/giaodien/admin") && role !== VaiTro.Admin) {
+    if (pathname.startsWith("/admin") && role !== VaiTro.Admin) {
       console.log("-> Bị chặn: Không có quyền Admin");
       return NextResponse.redirect(new URL("/giaodien/403", req.url));
     }
 
     // Chặn nếu vào /hocvien mà vai trò không hợp lệ (HocVien và Admin đều được vào)
     if (
-      pathname.startsWith("/giaodien/hocvien") &&
+      pathname.startsWith("/users/calendar") &&
       role !== VaiTro.HocVien &&
       role !== VaiTro.Admin
     ) {

@@ -30,9 +30,24 @@ model User {
 model HocVien {
   id   Int  @id
   User User @relation(fields: [id], references: [id], onDelete: Cascade)
+  ThoiGianBieu ThoiGianBieu[]
 }
 
 model Admin {
   id   Int  @id
   User User @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+model ThoiGianBieu {
+  id        Int      @id @default(autoincrement())
+  tieuDe    String
+  batDau    DateTime
+  ketThuc   DateTime
+  moTa      String?
+  
+  hocVienId Int @unique
+  hocVien   HocVien  @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
+
+  ngayTao     DateTime @default(now())
+  ngayCapNhat DateTime @updatedAt
 }

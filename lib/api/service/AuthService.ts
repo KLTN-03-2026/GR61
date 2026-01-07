@@ -19,10 +19,10 @@ export class AuthService {
   }
 
   /**
-   * Đăng ký người dùng
+   * Đăng ký người dùng và tự động tạo HocVien/Admin tương ứng
    */
   async register(data: CreateUserDto): Promise<User | null> {
-    // 1. Chỉ kiểm tra email nếu người dùng thực sự nhập email
+    // 1. Kiểm tra email tồn tại
     if (data.email) {
       const existing = await this.userRepository.findByEmail(data.email);
       if (existing) return null;
@@ -32,16 +32,32 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
-    // 3. Tạo User mới
-    // Sử dụng toán tử ?? null để đảm bảo Prisma nhận giá trị null thay vì undefined
-    return this.userRepository.create({
+    // 3. Chuẩn bị dữ liệu tạo User với Nested Writes
+    // Kỹ thuật này đảm bảo tính Atomicity (Tất cả hoặc không có gì)
+    const createData = {
       hoTen: data.hoTen,
       email: data.email ?? null,
       sdt: data.sdt ?? null,
       ngaySinh: data.ngaySinh ?? null,
       password: hashedPassword,
       vaiTro: data.vaiTro || VaiTro.HocVien,
-    } as any); // Ép kiểu any ở đây để bypass kiểm tra nghiêm ngặt của BaseRepository
+
+      // ĐÂY LÀ PHẦN QUAN TRỌNG NHẤT:
+      // Tự động tạo bản ghi ở bảng HocVien hoặc Admin tùy theo vaiTro
+      ...(data.vaiTro === VaiTro.HocVien && {
+        HocVien: {
+          create: {}, // Tạo bản ghi rỗng trong bảng HocVien với id = user.id
+        },
+      }),
+      ...(data.vaiTro === VaiTro.Admin && {
+        Admin: {
+          create: {}, // Tạo bản ghi rỗng trong bảng Admin với id = user.id
+        },
+      }),
+    };
+
+    // 4. Gọi repository để thực thi
+    return this.userRepository.create(createData as any);
   }
 
   /**
