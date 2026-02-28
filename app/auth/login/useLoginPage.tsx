@@ -53,7 +53,7 @@ export function useLoginPage() {
       if (role === "Admin") {
         router.push("/giaodien/admin");
       } else {
-        router.push("/giaodien/hocvien");
+        router.push("/users");
       }
     } catch (err) {
       setError("Email hoặc mật khẩu không chính xác");

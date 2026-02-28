@@ -45,7 +45,7 @@ model ThoiGianBieu {
   ketThuc   DateTime
   moTa      String?
   
-  hocVienId Int @unique
+  hocVienId Int 
   hocVien   HocVien  @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
 
   ngayTao     DateTime @default(now())
