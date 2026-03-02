@@ -28,30 +28,31 @@ export function useRegister() {
     if (error) setError("");
   };
 
+  // ... (phần trên giữ nguyên)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Kiểm tra các trường bắt buộc
     if (!formData.hoTen || !formData.email || !formData.password) {
       setError("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
       return;
     }
 
     try {
-      // Ép kiểu null cho các trường trống trước khi gửi lên API
+      // ✅ Chuẩn hóa dữ liệu trước khi gửi để khớp với Zod Schema
       const payload = {
-        ...formData,
-        email: formData.email || null,
+        hoTen: formData.hoTen,
+        email: formData.email,
         sdt: formData.sdt || null,
         ngaySinh: formData.ngaySinh || null,
+        password: formData.password,
+        vaiTro: "HocVien", // Mặc định cho trang đăng ký người dùng
       };
 
       await fetchData("POST", "/api/auth/register", payload);
       alert("Đăng ký thành công!");
       router.push("/auth/login");
     } catch (err: any) {
-      const msg = err.response?.data?.error;
-      setError(typeof msg === "string" ? msg : "Đăng ký thất bại");
+      setError("Đăng ký thất bại, vui lòng kiểm tra lại thông tin.");
     }
   };
 

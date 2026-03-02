@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import ScheduleView from "./ScheduleView";
-import { EventClickArg } from "@fullcalendar/core";
+import { EventClickArg, DateSelectArg } from "@fullcalendar/core";
 
 interface EventItem {
   id: string;
@@ -13,15 +13,16 @@ interface EventItem {
 
 export default function SchedulePage() {
   const [events, setEvents] = useState<EventItem[]>([]);
-
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [showEditPopup, setShowEditPopup] = useState(false);
 
+  const [showEditPopup, setShowEditPopup] = useState(false);
   const [showAddPopup, setShowAddPopup] = useState(false);
+
   const [newTitle, setNewTitle] = useState("");
   const [newStart, setNewStart] = useState("");
   const [newEnd, setNewEnd] = useState("");
 
+  // ================= LOAD LOCAL STORAGE =================
   useEffect(() => {
     const stored = localStorage.getItem("events");
     if (stored) {
@@ -36,6 +37,16 @@ export default function SchedulePage() {
   const saveEvents = (updated: EventItem[]) => {
     setEvents(updated);
     localStorage.setItem("events", JSON.stringify(updated));
+  };
+
+  // ================= SELECT DATE (CLICK / DRAG) =================
+  const handleDateSelect = (selectInfo: DateSelectArg) => {
+    setNewStart(selectInfo.startStr);
+    setNewEnd(selectInfo.endStr);
+    setShowAddPopup(true);
+
+    // Bỏ vùng chọn màu xanh
+    selectInfo.view.calendar.unselect();
   };
 
   // ================= ADD =================
@@ -74,7 +85,7 @@ export default function SchedulePage() {
     if (!selectedEvent) return;
 
     const updated = events.map((e) =>
-      e.id === selectedEvent.id ? selectedEvent : e
+      e.id === selectedEvent.id ? selectedEvent : e,
     );
 
     saveEvents(updated);
@@ -95,24 +106,17 @@ export default function SchedulePage() {
         📅 Lịch học của bạn
       </h1>
 
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setShowAddPopup(true)}
-          className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800"
-        >
-          ➕ Thêm
-        </button>
-      </div>
-
-      <ScheduleView events={events} onEventClick={handleEventClick} />
+      <ScheduleView
+        events={events}
+        onEventClick={handleEventClick}
+        onDateSelect={handleDateSelect}
+      />
 
       {/* ================= ADD POPUP ================= */}
       {showAddPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] space-y-4">
-            <h3 className="text-xl font-bold text-center">
-              ➕ Thêm lịch học
-            </h3>
+            <h3 className="text-xl font-bold text-center">➕ Thêm lịch học</h3>
 
             <input
               type="text"
@@ -158,9 +162,7 @@ export default function SchedulePage() {
       {showEditPopup && selectedEvent && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] space-y-4">
-            <h3 className="text-xl font-bold text-center">
-              🛠️ Sửa lịch học
-            </h3>
+            <h3 className="text-xl font-bold text-center">🛠️ Sửa lịch học</h3>
 
             <input
               type="text"

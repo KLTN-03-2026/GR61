@@ -5,7 +5,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { EventClickArg } from "@fullcalendar/core";
+import { EventClickArg, DateSelectArg } from "@fullcalendar/core";
 
 interface EventItem {
   id: string;
@@ -17,15 +17,19 @@ interface EventItem {
 export default function ScheduleView({
   events,
   onEventClick,
+  onDateSelect,
 }: {
   events: EventItem[];
   onEventClick: (info: EventClickArg) => void;
+  onDateSelect: (selectInfo: DateSelectArg) => void;
 }) {
   return (
     <div>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
+        selectable={true}
+        select={onDateSelect}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -40,19 +44,6 @@ export default function ScheduleView({
         .fc {
           background-color: white !important;
           color: black !important;
-        }
-
-        .fc-toolbar-title,
-        .fc-col-header-cell-cushion,
-        .fc-daygrid-day-number,
-        .fc-timegrid-slot-label,
-        .fc-timegrid-axis,
-        .fc-daygrid-day-top {
-          color: black !important;
-        }
-
-        .fc .fc-col-header-cell {
-          background-color: #f3f4f6 !important;
         }
 
         .fc-event {

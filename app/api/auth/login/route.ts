@@ -1,7 +1,5 @@
-// app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/api/service/AuthService";
-import { setCsrfCookie } from "@/lib/csrf";
 
 const authService = new AuthService();
 
@@ -13,17 +11,16 @@ export async function POST(req: NextRequest) {
     if (!loginResult) {
       return NextResponse.json(
         { error: "Email hoặc mật khẩu không chính xác" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { accessToken, refreshToken, user } = loginResult;
-    const csrfToken = await setCsrfCookie();
 
     const res = NextResponse.json({
       message: "Đăng nhập thành công",
-      user, // Frontend sẽ lưu cái này vào Zustand
-      csrfToken,
+      user,
+      // ✅ ĐÃ XÓA csrfToken ở đây
     });
 
     const isLocalhost = process.env.NODE_ENV !== "production";
@@ -34,15 +31,13 @@ export async function POST(req: NextRequest) {
       path: "/",
     };
 
-    // Thiết lập cặp bài trùng Access & Refresh Token
     res.cookies.set("access_token", accessToken, {
       ...cookieOptions,
-      maxAge: 60 * 60, // 1 giờ
+      maxAge: 3600,
     });
-
     res.cookies.set("refresh_token", refreshToken, {
       ...cookieOptions,
-      maxAge: 60 * 60 * 24 * 7, // 7 ngày
+      maxAge: 604800,
     });
 
     return res;
