@@ -1,45 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-serif: var(--font-lora), "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ========================================================
+   ẨN THANH CUỘN TOÀN CỤC (GLOBAL RESET)
+   ======================================================== */
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE, Edge cũ */
 }
 
-@media (prefers-color-scheme: dark) {
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Edge mới */
+}
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    @apply font-sans text-sm antialiased;
+  }
 
-/* =========================
-   ẨN SCROLLBAR – VẪN SCROLL
-   ========================= */
-
-/* Chrome, Edge, Safari */
-::-webkit-scrollbar {
-  display: none;
-}
-
-/* Firefox */
-html {
-  scrollbar-width: none;
-}
-
-/* IE / Edge cũ */
-body {
-  -ms-overflow-style: none;
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-lora), serif !important;
+    @apply font-black tracking-tight text-slate-900 italic;
+  }
 }

@@ -135,7 +135,7 @@ export default function TodoList() {
                     setEditingTodo(todo);
                     setIsModalOpen(true);
                   }}
-                  className="p-1.5 bg-white border-[2px] border-black rounded-lg hover:bg-amber-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all"
+                  className="p-1.5 bg-white  border-black rounded-lg hover:bg-amber-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none transition-all"
                 >
                   <Edit3 size={16} className="text-black stroke-[3]" />
                 </button>

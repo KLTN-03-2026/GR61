@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import axios from "axios";
@@ -8,19 +8,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Trash2,
   ArrowLeft,
   RotateCcw,
-  Edit3,
+  Star,
 } from "lucide-react";
+import FlashcardItem from "../components/FlashcardItem";
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
-export default function FolderManagementPage() {
+export default function FolderDetailPage() {
   const { folderId } = useParams();
   const router = useRouter();
-
-  // Gọi dữ liệu từ API Card
   const { data: cards, mutate } = useSWR(
     `/api/flashcard/card?folderId=${folderId}`,
     fetcher,
@@ -30,193 +28,166 @@ export default function FolderManagementPage() {
   const [flipped, setFlipped] = useState(false);
   const [newCard, setNewCard] = useState({ front: "", back: "" });
 
-  const handleAddCard = async () => {
-    if (!newCard.front || !newCard.back)
-      return alert("Dũng ơi, nhập đủ 2 mặt đã nhé!");
-    await axios.post("/api/flashcard/card", {
-      ...newCard,
-      folderId: parseInt(folderId as string),
-    });
-    setNewCard({ front: "", back: "" });
-    mutate(); // Load lại danh sách ngay lập tức
-  };
-
-  const handleDeleteCard = async (id: number) => {
-    if (confirm("Xóa thẻ này khỏi bộ sưu tập?")) {
-      await axios.delete(`/api/flashcard/card?id=${id}`);
-      mutate();
-    }
-  };
-
+  // Lọc dữ liệu thật từ Database
+  const starredCards = useMemo(
+    () => cards?.filter((c: any) => c.isStarred) || [],
+    [cards],
+  );
   const currentCard = cards?.[index];
 
+  const handleToggleStarOnFlip = async () => {
+    if (!currentCard) return;
+    await axios.patch("/api/flashcard/card/star", {
+      id: currentCard.id,
+      isStarred: currentCard.isStarred,
+    });
+    mutate();
+  };
+
   return (
-    // Sử dụng nền trắng (bg-white) và scale để hiển thị được nhiều hơn
-    <div className="p-8 max-w-6xl mx-auto space-y-10 scale-[0.88] origin-top text-black bg-white min-h-screen">
-      {/* 1. HEADER ĐIỀU HƯỚNG */}
-      <header className="flex justify-between items-center border-b-[4px] border-black pb-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 text-black bg-white min-h-screen no-scrollbar">
+      {/* HEADER */}
+      <header className="flex justify-between items-center border-b-2 border-slate-100 pb-5">
         <button
           onClick={() => router.push("/users/flashcard")}
-          className="flex items-center gap-2 font-black p-3 border-[3px] border-black rounded-2xl hover:bg-slate-50 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none uppercase text-sm"
+          className="flex items-center gap-2 font-black p-2 border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-[10px] uppercase"
         >
-          <ArrowLeft size={20} strokeWidth={3} /> Quay lại kho
+          <ArrowLeft size={14} strokeWidth={3} /> Quay lại
         </button>
-
-        <div className="text-center">
-          <p className="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-1">
-            Folder Detail
-          </p>
-          <h1 className="text-4xl font-black uppercase italic tracking-tighter leading-none">
-            Chi tiết thư mục
-          </h1>
-        </div>
-
+        <h1 className="text-3xl font-black uppercase italic tracking-tighter font-serif">
+          Smart Learning Detail
+        </h1>
         <button
           onClick={() => router.push(`/users/flashcard/${folderId}/quiz`)}
-          className="bg-red-500 text-white font-black border-[4px] border-black px-8 py-4 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex gap-2 active:shadow-none active:translate-y-1 transition-all uppercase italic"
+          className="bg-green-600 text-white font-black border-2 border-black px-4 py-2 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-[10px] uppercase italic transition-all active:translate-y-0.5 active:shadow-none"
         >
-          <Zap fill="white" /> Bắt đầu kiểm tra
+          <Zap size={14} fill="white" /> Kiểm tra
         </button>
       </header>
 
-      {/* 2. KHU VỰC ÔN TẬP (Lật thẻ như cuốn sách) */}
-      <section className="bg-slate-50 p-10 rounded-[50px] border-[4px] border-black border-dashed">
-        <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-2">
-          <span className="bg-yellow-400 p-1 border-2 border-black rounded-lg">
-            📖
-          </span>{" "}
-          Chế độ học tập
-        </h2>
-
-        <div
-          onClick={() => setFlipped(!flipped)}
-          className={`h-[380px] w-full bg-white border-[6px] border-black rounded-[50px] shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center p-12 cursor-pointer transition-all duration-500 active:scale-95 ${flipped ? "bg-blue-50" : ""}`}
-        >
-          <p className="text-xs font-black uppercase text-blue-600 mb-6 tracking-widest">
-            {flipped ? "Mặt sau (Đáp án)" : "Mặt trước (Câu hỏi)"}
-          </p>
-          <h2 className="text-5xl font-black text-center leading-tight tracking-tighter uppercase italic">
-            {cards?.length > 0
-              ? flipped
-                ? currentCard?.back
-                : currentCard?.front
-              : "Folder này còn trống"}
-          </h2>
-          <p className="mt-10 font-black text-slate-300 flex items-center gap-2 underline uppercase text-[10px]">
-            <RotateCcw size={14} /> Nhấn vào thẻ để xem mặt kia
-          </p>
-        </div>
-
-        {/* Nút lật trang */}
-        <div className="flex justify-center items-center gap-12 mt-10">
+      {/* KHU VỰC TRÊN: TRÁI HỌC - PHẢI TẠO */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <section className="bg-slate-50 p-6 rounded-[32px] border-2 border-black border-dashed relative">
           <button
-            disabled={index === 0}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIndex(index - 1);
-              setFlipped(false);
-            }}
-            className="p-5 border-[4px] border-black rounded-full bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] disabled:opacity-20 active:shadow-none transition-all"
+            onClick={handleToggleStarOnFlip}
+            className="absolute top-10 right-10 z-10 p-2 bg-white border-2 border-black rounded-full shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:scale-110 transition-transform"
           >
-            <ChevronLeft strokeWidth={4} size={32} />
+            <Star
+              size={20}
+              className={
+                currentCard?.isStarred
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-slate-300"
+              }
+            />
           </button>
-          <span className="text-4xl font-black italic tabular-nums">
-            {cards?.length > 0 ? index + 1 : 0}{" "}
-            <span className="text-slate-300">/</span> {cards?.length || 0}
-          </span>
-          <button
-            disabled={index === cards?.length - 1}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIndex(index + 1);
-              setFlipped(false);
-            }}
-            className="p-5 border-[4px] border-black rounded-full bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] disabled:opacity-20 active:shadow-none transition-all"
-          >
-            <ChevronRight strokeWidth={4} size={32} />
-          </button>
-        </div>
-      </section>
 
-      {/* 3. QUẢN LÝ THẺ (THÊM / XÓA) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6">
-        {/* Form thêm thẻ */}
-        <div className="p-8 border-[4px] border-black rounded-[40px] bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-2xl font-black mb-8 uppercase italic border-b-2 border-black pb-2 inline-block">
-            Thêm thẻ mới
-          </h3>
-          <div className="space-y-5">
-            <div>
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                Câu hỏi (Mặt trước)
-              </label>
-              <input
-                value={newCard.front}
-                onChange={(e) =>
-                  setNewCard({ ...newCard, front: e.target.value })
-                }
-                placeholder="Ví dụ: OOP là gì?"
-                className="w-full p-4 border-[3px] border-black rounded-2xl font-bold bg-slate-50 focus:bg-white outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                Đáp án (Mặt sau)
-              </label>
-              <textarea
-                value={newCard.back}
-                onChange={(e) =>
-                  setNewCard({ ...newCard, back: e.target.value })
-                }
-                placeholder="Nhập câu trả lời chi tiết..."
-                className="w-full p-4 border-[3px] border-black rounded-2xl font-bold bg-slate-50 focus:bg-white h-32 outline-none transition-all"
-              />
-            </div>
+          <div
+            onClick={() => setFlipped(!flipped)}
+            className={`min-h-[260px] w-full bg-white border-[3px] border-black rounded-[32px] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center p-8 cursor-pointer duration-500 ${flipped ? "bg-green-50" : ""}`}
+          >
+            <h2 className="text-2xl font-black text-center uppercase italic break-words w-full">
+              {cards?.length > 0
+                ? flipped
+                  ? currentCard?.back
+                  : currentCard?.front
+                : "Trống"}
+            </h2>
+            <p className="mt-6 font-black text-slate-300 text-[8px] uppercase tracking-widest flex items-center gap-1">
+              <RotateCcw size={10} /> Chạm để lật
+            </p>
+          </div>
+
+          <div className="flex justify-center items-center gap-6 mt-6">
             <button
-              onClick={handleAddCard}
-              className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl border-[4px] border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-500 active:shadow-none active:translate-y-1 transition-all uppercase text-lg"
+              disabled={index === 0}
+              onClick={() => {
+                setIndex(index - 1);
+                setFlipped(false);
+              }}
+              className="p-2 border-2 border-black rounded-full bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-20"
             >
-              <Plus className="inline-block mr-2" strokeWidth={4} /> Tạo thẻ
-              ngay
+              <ChevronLeft size={20} strokeWidth={4} />
+            </button>
+            <span className="text-lg font-black italic">
+              {cards?.length > 0 ? index + 1 : 0} / {cards?.length || 0}
+            </span>
+            <button
+              disabled={index === (cards?.length || 1) - 1}
+              onClick={() => {
+                setIndex(index + 1);
+                setFlipped(false);
+              }}
+              className="p-2 border-2 border-black rounded-full bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-20"
+            >
+              <ChevronRight size={20} strokeWidth={4} />
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Danh sách thẻ để xóa/sửa */}
-        <div className="flex flex-col">
-          <h3 className="text-2xl font-black uppercase mb-6 italic">
-            Danh sách thẻ ({cards?.length || 0})
+        <section className="p-6 border-[3px] border-black rounded-[32px] bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <h3 className="text-lg font-black mb-6 uppercase italic border-b-2 border-black pb-1 inline-block">
+            Tạo thẻ mới
           </h3>
-          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
-            {cards?.map((card: any) => (
-              <div
-                key={card.id}
-                className="p-4 border-[3px] border-black rounded-2xl bg-white flex justify-between items-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-slate-50 transition-all"
-              >
-                <div className="truncate pr-4">
-                  <p className="font-black text-slate-900 truncate uppercase text-sm">
-                    {card.front}
-                  </p>
-                  <p className="text-xs font-bold text-slate-400 truncate italic mt-1">
-                    {card.back}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button className="p-2 bg-white border-2 border-black rounded-lg hover:bg-amber-400 transition-all">
-                    <Edit3 size={16} strokeWidth={3} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCard(card.id)}
-                    className="p-2 bg-white border-2 border-black rounded-lg text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                  >
-                    <Trash2 size={16} strokeWidth={3} />
-                  </button>
-                </div>
-              </div>
+          <div className="space-y-4">
+            <input
+              value={newCard.front}
+              onChange={(e) =>
+                setNewCard({ ...newCard, front: e.target.value })
+              }
+              className="w-full p-3 border-2 border-black rounded-xl font-bold bg-slate-50 text-xs outline-none focus:bg-white transition-colors"
+              placeholder="Mặt trước..."
+            />
+            <textarea
+              value={newCard.back}
+              onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
+              className="w-full p-3 border-2 border-black rounded-xl font-bold bg-slate-50 h-24 text-xs outline-none focus:bg-white transition-colors"
+              placeholder="Mặt sau..."
+            />
+            <button
+              onClick={async () => {
+                if (!newCard.front || !newCard.back)
+                  return alert("Nhập đủ 2 mặt nhé Dũng!");
+                await axios.post("/api/flashcard/card", {
+                  ...newCard,
+                  folderId: Number(folderId),
+                });
+                setNewCard({ front: "", back: "" });
+                mutate();
+              }}
+              className="w-full py-3 bg-green-600 text-white font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-[10px] hover:bg-green-700 transition-all active:translate-y-0.5 active:shadow-none"
+            >
+              Lưu thẻ vào kho
+            </button>
+          </div>
+        </section>
+      </div>
+
+      {/* KHU VỰC DƯỚI: TRÁI QUAN TRỌNG - PHẢI TẤT CẢ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+        <section className="space-y-4">
+          <h3 className="text-lg font-black uppercase italic text-yellow-500 flex items-center gap-2">
+            <Star size={18} fill="currentColor" /> Quan trọng (
+            {starredCards.length})
+          </h3>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar">
+            {starredCards.map((c: any) => (
+              <FlashcardItem key={c.id} card={c} mutate={mutate} />
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-lg font-black uppercase italic text-slate-400 flex items-center gap-2">
+            <div className="w-2 h-5 bg-black rounded-full"></div> Tất cả thẻ (
+            {cards?.length || 0})
+          </h3>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar">
+            {cards?.map((c: any) => (
+              <FlashcardItem key={c.id} card={c} mutate={mutate} />
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

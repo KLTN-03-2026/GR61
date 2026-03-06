@@ -1,132 +1,230 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFlashcardHistory } from "../hooks/useFlashcardHistory";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
-import { ArrowLeft, Award, Clock, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  Calendar,
+  BarChart3,
+  ListChecks,
+} from "lucide-react";
 
 export default function FlashcardHistoryPage() {
   const router = useRouter();
-  const { history, chartData, isLoading } = useFlashcardHistory();
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
+  const [viewMode, setViewMode] = useState<"score" | "count">("score");
+  const { history, chartData, isLoading } = useFlashcardHistory(timeRange);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  if (isLoading)
+    return (
+      <div className="h-screen flex items-center justify-center font-black italic text-green-600 animate-pulse text-xs uppercase tracking-widest">
+        Đang tải báo cáo...
+      </div>
+    );
 
   return (
-    <div className="p-8 bg-white min-h-screen text-black scale-[0.85] origin-top-left w-[117.6%] h-[117.6%] overflow-y-auto">
-      {/* 1. Header */}
-      <header className="flex justify-between items-end border-b-[4px] border-black pb-6 mb-10">
-        <div>
+    <div className="max-w-7xl mx-auto p-6 bg-white min-h-screen text-slate-900 no-scrollbar">
+      {/* HEADER TỐI GIẢN */}
+      <header className="flex justify-between items-center mb-8 border-b-2 border-slate-100 pb-5">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="mb-4 flex items-center gap-2 font-bold p-2 border-2 border-black rounded-xl hover:bg-slate-50 transition-all"
+            className="p-2 border-2 border-black rounded-xl hover:bg-slate-50 shadow-sm transition-all"
           >
-            <ArrowLeft size={18} /> Quay lại
+            <ArrowLeft size={18} strokeWidth={3} />
           </button>
-          <h1 className="text-6xl font-black uppercase tracking-tighter italic">
+          <h1 className="text-4xl font-black uppercase tracking-tighter italic">
             Lịch sử rèn luyện
           </h1>
         </div>
-        <div className="bg-yellow-400 border-[3px] border-black p-4 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] font-black text-xl italic uppercase">
-          Tích cực học tập!
-        </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* 2. Biểu đồ tiến độ (Bên trái) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="p-8 border-[4px] border-black rounded-[40px] bg-white shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] h-[450px]">
-            <h3 className="text-2xl font-black mb-8 uppercase tracking-tight">
-              Biểu đồ điểm số (%)
-            </h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#eee"
-                  />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontWeight: 600 }}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    tick={{ fontWeight: 600 }}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "16px",
-                      border: "3px solid black",
-                      fontWeight: "bold",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="#2563eb"
-                    strokeWidth={5}
-                    dot={{
-                      r: 8,
-                      fill: "#fff",
-                      stroke: "#2563eb",
-                      strokeWidth: 3,
-                    }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+      <div className="flex flex-col lg:flex-row gap-8 mb-12">
+        {/* SIDEBAR XANH LÁ */}
+        <aside className="lg:w-1/4 space-y-4">
+          <div className="p-5 border-2 border-slate-100 rounded-[24px] shadow-xl bg-white">
+            <p className="text-[10px] font-black uppercase text-green-600 mb-4 flex items-center gap-2">
+              <Calendar size={12} /> Phạm vi
+            </p>
+            <div className="flex flex-col gap-2">
+              <FilterBtn
+                active={timeRange === "week"}
+                onClick={() => setTimeRange("week")}
+                label="Tuần hiện tại"
+              />
+              <FilterBtn
+                active={timeRange === "month"}
+                onClick={() => setTimeRange("month")}
+                label="Tháng hiện tại"
+              />
+              <FilterBtn
+                active={timeRange === "year"}
+                onClick={() => setTimeRange("year")}
+                label="Năm hiện tại"
+              />
             </div>
           </div>
+          <div className="p-5 border-2 border-slate-100 rounded-[24px] shadow-xl bg-white">
+            <p className="text-[10px] font-black uppercase text-green-600 mb-4 flex items-center gap-2">
+              <BarChart3 size={12} /> Chế độ xem
+            </p>
+            <div className="flex flex-col gap-2">
+              <FilterBtn
+                active={viewMode === "score"}
+                onClick={() => setViewMode("score")}
+                label="Điểm trung bình"
+              />
+              <FilterBtn
+                active={viewMode === "count"}
+                onClick={() => setViewMode("count")}
+                label="Số lượng bài làm"
+              />
+            </div>
+          </div>
+        </aside>
+
+        {/* BIỂU ĐỒ XANH LÁ */}
+        <main className="lg:w-3/4 p-6 border-2 border-slate-50 rounded-[32px] shadow-xl h-[380px] bg-white">
+          <ResponsiveContainer width="100%" height="100%">
+            {viewMode === "score" ? (
+              <AreaChart data={chartData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#f1f5f9"
+                />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "2px solid #16a34a",
+                    fontWeight: "900",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="score"
+                  stroke="#16a34a"
+                  strokeWidth={3}
+                  fill="#16a34a"
+                  fillOpacity={0.1}
+                />
+              </AreaChart>
+            ) : (
+              <BarChart data={chartData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#f1f5f9"
+                />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "2px solid #16a34a",
+                    fontWeight: "900",
+                  }}
+                />
+                <Bar dataKey="count" fill="#16a34a" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </main>
+      </div>
+
+      {/* DANH SÁCH BÀI THI */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-4 border-b-2 border-slate-100 pb-2">
+          <ListChecks size={20} className="text-green-600" />
+          <h3 className="text-lg font-black uppercase italic tracking-tighter">
+            Danh sách các bài thi đã thực hiện
+          </h3>
         </div>
 
-        {/* 3. Danh sách chi tiết (Bên phải) */}
-        <div className="space-y-6 overflow-hidden">
-          <h3 className="text-2xl font-black uppercase italic">
-            Bài thi gần đây
-          </h3>
-          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {isLoading ? (
-              <p className="font-bold text-slate-300">Đang tải lịch sử...</p>
-            ) : (
-              history?.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="p-5 border-[3px] border-black rounded-[25px] bg-white shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-3"
-                >
-                  <div className="flex justify-between items-start">
-                    <h4 className="text-xl font-black text-blue-600 truncate uppercase tracking-tighter italic">
-                      {item.folder.name}
-                    </h4>
-                    <span className="bg-black text-white px-3 py-1 rounded-lg font-black text-sm">
-                      {item.score.toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="flex gap-4 text-xs font-bold text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <BookOpen size={14} /> {item.correctAnswers}/
-                      {item.totalQuestions} câu
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={14} /> {item.timeSpent}s
-                    </span>
-                  </div>
-                  <p className="text-[10px] font-black uppercase text-slate-300 border-t border-slate-100 pt-2">
-                    {new Date(item.createdAt).toLocaleString("vi-VN")}
-                  </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {history?.map((item: any) => (
+            <div
+              key={item.id}
+              className="p-5 border-2 border-slate-50 rounded-[24px] shadow-xl bg-white hover:translate-y-[-4px] transition-all group"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <h4 className="text-sm font-black uppercase italic text-slate-900 group-hover:text-green-600 transition-colors">
+                  {item.folder.name}
+                </h4>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-slate-50">
+                <div className="flex gap-4 text-[10px] font-black text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <BookOpen size={12} className="text-green-600" />{" "}
+                    {item.correctAnswers}/{item.totalQuestions}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} className="text-green-600" />{" "}
+                    {formatTime(item.timeSpent)}
+                  </span>
                 </div>
-              ))
-            )}
-          </div>
+                <div className="bg-green-600 text-white px-3 py-1 rounded-lg font-black text-xs shadow-md">
+                  {item.score.toFixed(0)}%
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
+  );
+}
+
+function FilterBtn({ active, onClick, label }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full py-2.5 rounded-xl font-black text-[10px] uppercase italic transition-all border-2 border-black ${active ? `bg-green-600 text-white shadow-none translate-y-0.5` : "bg-white text-black shadow-md hover:bg-green-50"}`}
+    >
+      {label}
+    </button>
   );
 }
