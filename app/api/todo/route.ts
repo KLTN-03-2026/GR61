@@ -1,33 +1,16 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { TodoService } from "@/lib/api/service/TodoService";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const dateStr = searchParams.get("date");
-    const userId = parseInt(req.headers.get("x-user-id") || "0");
+    const date = searchParams.get("date") || "";
+    const userId = parseInt(req.headers.get("x-user-id") || "0"); // ID từ middleware
 
-    if (!userId)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!dateStr)
-      return NextResponse.json({ error: "Missing date" }, { status: 400 });
-
-    const startOfDay = new Date(dateStr);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(dateStr);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const todos = await prisma.todo.findMany({
-      where: {
-        hocVienId: userId,
-        targetDate: { gte: startOfDay, lte: endOfDay },
-      },
-      orderBy: { priority: "desc" },
-    });
-
-    return NextResponse.json(todos);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const data = await TodoService.getTodos(userId, date);
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: "Lỗi GET" }, { status: 500 });
   }
 }
 
@@ -35,18 +18,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const userId = parseInt(req.headers.get("x-user-id") || "0");
-
-    const todo = await prisma.todo.create({
-      data: {
-        title: body.title,
-        priority: body.priority || "MEDIUM",
-        targetDate: new Date(body.targetDate),
-        hocVienId: userId,
-        status: false,
-      },
-    });
-    return NextResponse.json(todo);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const data = await TodoService.saveTodo(userId, body);
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: "Lỗi POST" }, { status: 500 });
   }
 }

@@ -1,7 +1,5 @@
 import { TodoRepository } from "../repositories/TodoRepository";
 import {
-  startOfDay,
-  endOfDay,
   startOfWeek,
   endOfWeek,
   startOfMonth,
@@ -9,24 +7,20 @@ import {
   startOfYear,
   endOfYear,
   eachDayOfInterval,
-  format,
   eachMonthOfInterval,
+  format,
   isSameDay,
   isSameMonth,
 } from "date-fns";
 
 export class StatisticsService {
-  private todoRepo: TodoRepository;
-
-  constructor() {
-    this.todoRepo = new TodoRepository();
-  }
+  private todoRepo = new TodoRepository();
 
   async getTodoStats(userId: number, type: "week" | "month" | "year") {
     const now = new Date();
     let start: Date, end: Date;
 
-    // Xác định phạm vi thời gian dựa trên filter
+    // Xác định mốc thời gian
     if (type === "week") {
       start = startOfWeek(now, { weekStartsOn: 1 });
       end = endOfWeek(now, { weekStartsOn: 1 });
@@ -40,44 +34,28 @@ export class StatisticsService {
 
     const todos = await this.todoRepo.findByDateRange(userId, start, end);
 
-    // Chế độ xem theo năm: Nhóm theo Tháng
-    if (type === "year") {
-      const months = eachMonthOfInterval({ start, end });
-      return months.map((m) => {
-        const monthTodos = todos.filter((t) =>
-          isSameMonth(new Date(t.targetDate), m),
-        );
-        const completed = monthTodos.filter((t) => t.status).length;
-        const total = monthTodos.length;
-        return {
-          name: format(m, "MMM"), // "Jan", "Feb"...
-          completed,
-          uncompleted: total - completed,
-          total,
-          rateCompleted: total > 0 ? Math.round((completed / total) * 100) : 0,
-          rateUncompleted:
-            total > 0 ? Math.round(((total - completed) / total) * 100) : 100,
-        };
-      });
-    }
+    // Gom nhóm dữ liệu theo Năm hoặc Tuần/Tháng
+    const interval =
+      type === "year"
+        ? eachMonthOfInterval({ start, end })
+        : eachDayOfInterval({ start, end });
 
-    // Chế độ xem theo tuần/tháng: Nhóm theo Ngày
-    const days = eachDayOfInterval({ start, end });
-    return days.map((d) => {
-      const dayTodos = todos.filter((t) =>
-        isSameDay(new Date(t.targetDate), d),
+    return interval.map((date) => {
+      const filtered = todos.filter((t) =>
+        type === "year"
+          ? isSameMonth(new Date(t.targetDate), date)
+          : isSameDay(new Date(t.targetDate), date),
       );
-      const completed = dayTodos.filter((t) => t.status).length;
-      const total = dayTodos.length;
+
+      const completed = filtered.filter((t) => t.status).length;
+      const total = filtered.length;
+
       return {
-        name: format(d, "dd/MM"), // "02/03", "03/03"...
+        name: format(date, type === "year" ? "MMM" : "dd/MM"),
         completed,
         uncompleted: total - completed,
         total,
-        // Tính tỷ lệ cho biểu đồ 100%
         rateCompleted: total > 0 ? Math.round((completed / total) * 100) : 0,
-        rateUncompleted:
-          total > 0 ? Math.round(((total - completed) / total) * 100) : 100,
       };
     });
   }

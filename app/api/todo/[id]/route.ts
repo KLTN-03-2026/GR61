@@ -1,25 +1,17 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { TodoService } from "@/lib/api/service/TodoService";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }, // 👈 Khai báo là Promise
+  { params }: { params: Promise<{ id: string }> }, // Next.js 15 yêu cầu Promise
 ) {
   try {
-    const { id } = await params; // 👈 Cần await để lấy id
+    const { id } = await params; // Lấy ID từ URL
     const body = await req.json();
-    const todoId = parseInt(id);
+    const userId = parseInt(req.headers.get("x-user-id") || "0");
 
-    const updatedTodo = await prisma.todo.update({
-      where: { id: todoId },
-      data: {
-        ...(body.title !== undefined && { title: body.title }),
-        ...(body.status !== undefined && { status: body.status }),
-        ...(body.priority !== undefined && { priority: body.priority }),
-      },
-    });
-
-    return NextResponse.json(updatedTodo);
+    const updated = await TodoService.saveTodo(userId, { ...body, id });
+    return NextResponse.json(updated);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 400 });
   }
@@ -27,17 +19,12 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }, // 👈 Khai báo là Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await params; // 👈 Cần await để lấy id
-    const todoId = parseInt(id);
-
-    await prisma.todo.delete({
-      where: { id: todoId },
-    });
-
-    return NextResponse.json({ message: "Đã xóa công việc" });
+    const { id } = await params;
+    await TodoService.removeTodo(parseInt(id));
+    return NextResponse.json({ message: "Xóa thành công" });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 400 });
   }

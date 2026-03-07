@@ -15,7 +15,7 @@ export function useDashboardData() {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        // A. Lấy Lịch học hôm nay từ LocalStorage
+        // 1. Lấy Lịch học hôm nay từ LocalStorage
         const localEvents = JSON.parse(
           localStorage.getItem("dtu_events_final") || "[]",
         );
@@ -23,7 +23,7 @@ export function useDashboardData() {
           isSameDay(new Date(e.start), new Date()),
         ).length;
 
-        // B. Lấy Todo & Flashcard từ Database API
+        // 2. Lấy Todo & Flashcard từ Database API
         const res = await fetch("/api/user/dashboard");
         if (res.ok) {
           const dbData = await res.json();
@@ -36,7 +36,7 @@ export function useDashboardData() {
           });
         }
       } catch (err) {
-        console.error("Load Dashboard Stats Failed", err);
+        console.error("Dashboard Load Failed", err);
       } finally {
         setLoading(false);
       }
@@ -44,5 +44,5 @@ export function useDashboardData() {
     loadStats();
   }, []);
 
-  return { stats, loading };
+  return { stats, loading }; // Trả về object chứa cả dữ liệu và trạng thái tải
 }

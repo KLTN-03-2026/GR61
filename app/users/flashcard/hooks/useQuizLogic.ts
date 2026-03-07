@@ -2,21 +2,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export function useQuiz(folderId: string, quizData: any[]) {
+export function useQuizLogic(folderId: string, quizData: any[]) {
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [timer, setTimer] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
+  // Bộ đếm thời gian
   useEffect(() => {
     if (!quizData || isFinished) return;
     const interval = setInterval(() => setTimer((t) => t + 1), 1000);
     return () => clearInterval(interval);
   }, [quizData, isFinished]);
 
-  // Logic 4 đáp án cũ: So sánh string đáp án
-  const handleAnswer = async (selectedOption: string) => {
-    const isCorrect = selectedOption === quizData[index].back;
+  const handleAnswer = async (selected: string) => {
+    const isCorrect = selected === quizData[index].back;
     const newCorrect = isCorrect ? correct + 1 : correct;
     setCorrect(newCorrect);
 
@@ -24,12 +24,13 @@ export function useQuiz(folderId: string, quizData: any[]) {
       setIndex(index + 1);
     } else {
       setIsFinished(true);
-      // Gửi đúng format API yêu cầu: correct, total, time, folderId
+      // Gửi kết quả về MySQL để lưu lịch sử
       await axios.post("/api/flashcard/history", {
         folderId: parseInt(folderId),
-        correct: newCorrect,
-        total: quizData.length,
-        time: timer,
+        correctAnswers: newCorrect,
+        totalQuestions: quizData.length,
+        timeSpent: timer,
+        score: Math.round((newCorrect / quizData.length) * 100),
       });
     }
   };

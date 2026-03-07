@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { VaiTro } from "@prisma/client";
+import { VaiTro } from "@/app/generated/prisma";
 
 const SECRET = process.env.JWT_SECRET!;
 

@@ -20,8 +20,8 @@ export default function ScheduleView({
         editable={true}
         select={onDateSelect}
         eventClick={onEventClick}
-        eventDrop={(info) => onEventChange(info.event)}
-        eventResize={(info) => onEventChange(info.event)}
+        eventDrop={(info) => onEventChange(info.event)} // xử lý kéo thả
+        eventResize={(info) => onEventChange(info.event)} // xử lý co giãn thời gian
         dayHeaderFormat={{
           weekday: "long",
           day: "2-digit",
@@ -36,22 +36,22 @@ export default function ScheduleView({
         locale="vi"
         events={events}
         height="auto"
-        // CẬP NHẬT HIỂN THỊ NỘI DUNG THẺ
+        // Nội dung thẻ thởi gian biểu
         eventContent={(info) => (
           <div className="p-1.5 flex flex-col gap-0.5 overflow-hidden text-white italic h-full">
-            {/* 1. HIỂN THỊ GIỜ (VD: 08:00 - 10:00) */}
+            {/* Hiện giờ */}
             <div className="text-[8px] font-black opacity-90 flex items-center gap-1">
               <span className="bg-white/20 px-1 rounded border border-white/30 uppercase">
                 {info.timeText}
               </span>
             </div>
 
-            {/* 2. TIÊU ĐỀ MÔN HỌC */}
+            {/* Tiêu đề */}
             <div className="font-black uppercase text-[10px] leading-tight truncate mt-0.5">
               {info.event.title}
             </div>
 
-            {/* 3. GHI CHÚ NHỎ */}
+            {/* Ghi chú */}
             {info.event.extendedProps.note && (
               <div className="text-[8px] font-medium opacity-70 border-t border-white/20 pt-0.5 truncate italic">
                 {info.event.extendedProps.note}

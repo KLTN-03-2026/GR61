@@ -1,13 +1,10 @@
-import { Todo } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export class TodoRepository {
-  // Lấy Todo trong một khoảng ngày cụ thể của một học viên
-  async findByDateRange(
-    userId: number,
-    start: Date,
-    end: Date,
-  ): Promise<Todo[]> {
+  // ... các hàm cũ (create, update, delete) giữ nguyên ...
+
+  // NEW: Tìm Todo trong một khoảng ngày cụ thể (Dùng cho Thống kê)
+  async findByDateRange(userId: number, start: Date, end: Date) {
     return await prisma.todo.findMany({
       where: {
         hocVienId: userId,

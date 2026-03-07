@@ -2,17 +2,13 @@
 import { Star, Edit3, Trash2 } from "lucide-react";
 import axios from "axios";
 
-export default function FlashcardItem({ card, mutate }: any) {
+export default function FlashcardItem({ card, mutate, onDelete, onEdit }: any) {
   const toggleStar = async () => {
-    try {
-      await axios.patch("/api/flashcard/card/star", {
-        id: card.id,
-        isStarred: card.isStarred,
-      });
-      mutate(); // Cập nhật danh sách ngay lập tức
-    } catch (error) {
-      console.error(error);
-    }
+    await axios.patch("/api/flashcard/card/star", {
+      id: card.id,
+      isStarred: card.isStarred,
+    });
+    mutate();
   };
 
   return (
@@ -41,10 +37,16 @@ export default function FlashcardItem({ card, mutate }: any) {
             }
           />
         </button>
-        <button className="p-1.5 border-2 border-black rounded-lg bg-white hover:bg-slate-100">
+        <button
+          onClick={() => onEdit(card)}
+          className="p-1.5 border-2 border-black rounded-lg bg-white hover:bg-slate-100"
+        >
           <Edit3 size={14} />
         </button>
-        <button className="p-1.5 border-2 border-black rounded-lg bg-white text-red-500 hover:bg-red-500 hover:text-white">
+        <button
+          onClick={() => onDelete(card.id)}
+          className="p-1.5 border-2 border-black rounded-lg bg-white text-red-500 hover:bg-red-500 hover:text-white"
+        >
           <Trash2 size={14} />
         </button>
       </div>

@@ -1,143 +1,111 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import axios from "axios";
-import { Clock, Trophy, ArrowLeft, Zap, Target } from "lucide-react";
+import { useQuiz } from "../../hooks/useQuiz";
+import { Clock, Trophy, ArrowLeft, Target } from "lucide-react";
 
-const fetcher = (url: string) => axios.get(url).then((res) => res.data);
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FastQuizPage() {
   const { folderId } = useParams();
   const router = useRouter();
-
   const { data: quizData, isLoading } = useSWR(
     `/api/flashcard/quiz?folderId=${folderId}`,
     fetcher,
     { revalidateOnFocus: false },
   );
 
-  const [index, setIndex] = useState(0);
-  const [correct, setCorrect] = useState(0);
-  const [timer, setTimer] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  useEffect(() => {
-    if (isLoading || isFinished) return;
-    const interval = setInterval(() => setTimer((t) => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, [isLoading, isFinished]);
-
-  const handleAnswer = async (selected: string) => {
-    const isCorrect = selected === quizData[index].back;
-    const newCorrect = isCorrect ? correct + 1 : correct;
-    setCorrect(newCorrect);
-
-    if (index + 1 < quizData.length) {
-      setIndex(index + 1);
-    } else {
-      setIsFinished(true);
-      await axios.post("/api/flashcard/history", {
-        folderId: parseInt(folderId as string),
-        correct: newCorrect,
-        total: quizData.length,
-        time: timer,
-      });
-    }
-  };
+  const { index, timer, isFinished, handleAnswer, current } = useQuiz(
+    folderId as string,
+    quizData,
+  );
 
   if (isLoading)
     return (
-      <div className="h-screen flex items-center justify-center font-black italic text-green-600 animate-pulse uppercase text-[10px] tracking-widest">
-        Đang chuẩn bị đề thi...
+      <div className="h-screen flex items-center justify-center font-black italic text-green-600 animate-pulse uppercase tracking-widest">
+        Đang soạn đề...
       </div>
     );
 
-  if (isFinished) {
+  if (isFinished)
     return (
-      <div className="h-screen flex items-center justify-center bg-white p-6 text-slate-900">
-        <div className="max-w-sm w-full border-2 border-slate-100 p-8 rounded-[32px] shadow-xl text-center bg-white">
-          <Trophy size={48} className="text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-black mb-1 uppercase italic tracking-tighter">
-            Kết quả
-          </h2>
-          <div className="text-7xl font-black leading-none mb-8 text-green-600 italic">
-            {Math.round((correct / quizData.length) * 100)}%
-          </div>
-          <button
-            onClick={() => router.push(`/users/flashcard/${folderId}`)}
-            className="w-full py-4 bg-green-600 text-white font-black rounded-xl shadow-lg hover:bg-green-700 transition-all uppercase italic text-xs"
-          >
-            Hoàn tất
-          </button>
-        </div>
-      </div>
+      <ResultScreen
+        score={Math.round((index / quizData.length) * 100)}
+        folderId={folderId}
+        router={router}
+      />
     );
-  }
-
-  const current = quizData[index];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 p-6 flex flex-col items-center no-scrollbar">
       <div className="w-full max-w-2xl">
-        {/* HEADER: ĐÃ TỐI GIẢN VÀ DỊCH LÊN TRÊN */}
-        <header className="flex justify-between items-center mb-6 pt-2">
+        <header className="flex justify-between items-center mb-10">
           <button
-            onClick={() => router.push(`/users/flashcard/${folderId}`)}
-            className="p-2 text-green-700 bg-white rounded-lg hover:bg-green-700 hover:text-white transition-colors"
+            onClick={() => router.back()}
+            className="p-2 border-2 border-black rounded-xl hover:bg-slate-50 shadow-sm"
           >
-            <ArrowLeft size={26} strokeWidth={3} />
+            <ArrowLeft size={20} />
           </button>
-
-          <div className="flex items-center gap-3">
-            <div className="bg-green-700 border-black border-2 text-white px-4 py-1.5 rounded-full font-black flex items-center gap-2 text-xs italic shadow-md">
-              <Clock size={14} /> {formatTime(timer)}
+          <div className="flex gap-3">
+            <div className="bg-green-700 text-white px-4 py-1.5 rounded-full font-black flex items-center gap-2 text-xs italic border-2 border-black shadow-md">
+              <Clock size={14} /> {timer}s
             </div>
-            <div className="text-[11px] font-black uppercase bg-white border-2  border-black px-4 py-1.5 rounded-full shadow-sm">
+            <div className="bg-white border-2 border-black px-4 py-1.5 rounded-full font-black text-xs shadow-sm uppercase italic">
               {index + 1} / {quizData.length}
             </div>
           </div>
         </header>
 
-        {/* THẺ CÂU HỎI: SHADOW-XL VÀ CHỐNG TRÀN */}
-        <div className="mb-8 p-10 bg-white rounded-[32px] shadow-xl min-h-[180px] flex flex-col items-center justify-center relative overflow-hidden border-2 border-black shadow-2xl shadow-gray-400">
-          <div className="absolute -bottom-4 -right-4 opacity-5">
-            <Zap size={100} fill="green" />
+        {/* THẺ CÂU HỎI */}
+        <div className="mb-10 p-12 bg-white border-4 border-black rounded-[40px] shadow-[15px_15px_0px_0px_#000] min-h-[220px] flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="flex items-center gap-2 mb-4 text-slate-400 font-black uppercase text-[10px] tracking-widest">
+            <Target size={14} className="text-green-600" /> Question
           </div>
-          <div className="flex items-center gap-2 mb-4">
-            <Target size={14} className="text-green-600" />
-            <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em]">
-              Question
-            </p>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black leading-tight text-center uppercase italic break-words w-full whitespace-pre-wrap px-4">
+          <h2 className="text-3xl font-black text-center uppercase italic break-words w-full">
             {current?.front}
           </h2>
         </div>
 
-        {/* ĐÁP ÁN: 2 CỘT VÀ SHADOW-XL */}
+        {/* 4 ĐÁP ÁN KHÔI PHỤC */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {current?.options.map((opt: string, i: number) => (
             <button
               key={i}
               onClick={() => handleAnswer(opt)}
-              className="group flex items-center p-5 bg-white border-2 hover:bg-green-600 hover:text-white text-slate-900 border-balck rounded-[24px] shadow-2xl hover:shadow-2xl active:translate-y-1 transition-all text-left min-h-[80px] shadow-2xl shadow-gray-400"
+              className="group flex items-center p-5 bg-white border-2 border-black rounded-[24px] shadow-[6px_6px_0px_0px_#000] hover:bg-green-600 hover:text-white active:translate-y-1 active:shadow-none transition-all text-left"
             >
-              <div className="w-8 h-8 flex-shrink-0 bg-green-600 text-white border-2 border-black rounded-lg flex items-center justify-center font-black mr-4 text-[10px] group-hover:bg-white group-hover:text-green-700 transition-colors">
+              <div className="w-8 h-8 flex-shrink-0 bg-green-600 text-white border-2 border-black rounded-lg flex items-center justify-center font-black mr-4 text-xs group-hover:bg-white group-hover:text-green-600 transition-colors">
                 {String.fromCharCode(65 + i)}
               </div>
-              <span className="text-sm font-black tracking-tight uppercase italic leading-tight break-words flex-1">
+              <span className="text-sm font-black tracking-tight uppercase italic flex-1">
                 {opt}
               </span>
             </button>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultScreen({ score, folderId, router }: any) {
+  return (
+    <div className=" flex items-center justify-center mt-12 bg-white">
+      <div className="max-w-sm w-full border-4 border-black p-10 rounded-[40px] shadow-[15px_15px_0px_0px_#000] text-center bg-white">
+        <Trophy size={60} className="text-green-600 mx-auto mb-4" />
+        <h2 className="text-3xl font-black mb-1 uppercase italic tracking-tighter">
+          Kết quả
+        </h2>
+        <div className="text-8xl font-black leading-none mb-10 text-green-600 italic">
+          {score}%
+        </div>
+        <button
+          onClick={() => router.push(`/users/flashcard/${folderId}`)}
+          className="w-full py-4 bg-green-600 text-white font-black border-2 border-black rounded-2xl shadow-lg hover:bg-green-700 transition-all uppercase italic text-sm"
+        >
+          Hoàn tất
+        </button>
       </div>
     </div>
   );

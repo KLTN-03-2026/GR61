@@ -9,6 +9,7 @@ export function useStatistics() {
   const [period, setPeriod] = useState("week"); // week, month, year
   const [view, setView] = useState("quantity"); // quantity, rate
 
+  // Tự động gọi lại API mỗi khi 'period' thay đổi
   const { data, isLoading } = useSWR(
     `/api/statistics/todo?type=${period}`,
     fetcher,

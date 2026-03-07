@@ -10,8 +10,18 @@ export default function SchedulePage() {
   const { events, categories, popups, setPopups, form, setForm, sync } =
     useSchedule();
 
+  // Logic xử lý lưu và xóa tập trung tại đây để dễ kiểm soát
+  const handleSave = () => {
+    const cate = categories.find((c) => c.id === form.categoryId);
+    const data = { ...form, backgroundColor: cate?.color || "#16a34a" };
+    popups.add
+      ? sync([...events, { ...data, id: crypto.randomUUID() }])
+      : sync(events.map((e) => (e.id === form.id ? data : e)));
+    setPopups({ ...popups, add: false, edit: false });
+  };
+
   return (
-    <div className="p-8 space-y-2 bg-white min-h-screen no-scrollbar">
+    <div className="p-8 space-y-4 bg-white min-h-screen no-scrollbar">
       <ScheduleHeader onOpenCate={() => setPopups({ ...popups, cate: true })} />
 
       <ScheduleView
@@ -52,16 +62,9 @@ export default function SchedulePage() {
           setForm={setForm}
           categories={categories}
           onClose={() => setPopups({ ...popups, add: false, edit: false })}
-          onSave={() => {
-            const cate = categories.find((c) => c.id === form.categoryId);
-            const data = { ...form, backgroundColor: cate?.color || "#16a34a" };
-            popups.add
-              ? sync([...events, { ...data, id: crypto.randomUUID() }])
-              : sync(events.map((e) => (e.id === form.id ? data : e)));
-            setPopups({ ...popups, add: false, edit: false });
-          }}
+          onSave={handleSave}
           onDelete={() => {
-            if (confirm("Xóa lịch này khỏi hệ thống?")) {
+            if (confirm("Xóa?")) {
               sync(events.filter((e) => e.id !== form.id));
               setPopups({ ...popups, edit: false });
             }

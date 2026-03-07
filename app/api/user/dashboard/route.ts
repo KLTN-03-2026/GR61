@@ -1,40 +1,15 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { prisma } from "@/lib/prisma";
+import { DashboardService } from "@/lib/api/service/DashboardService";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    // 1. Lấy ID người dùng từ Header (do Middleware gán)
-    const headerList = await headers();
-    const userId = Number(headerList.get("x-user-id"));
-
-    if (!userId) {
+    const userId = parseInt(req.headers.get("x-user-id") || "0"); // Lấy từ middleware
+    if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
-    // 2. Truy vấn đồng thời Todo và Flashcard từ MySQL
-    const [totalTodos, doneTodos, flashcardFolders] = await Promise.all([
-      prisma.todo.count({ where: { hocVienId: userId } }),
-      prisma.todo.count({ where: { hocVienId: userId, status: true } }),
-      prisma.flashcardfolder.count({ where: { userId: userId } }),
-    ]);
-
-    // 3. Tính toán hiệu suất học tập
-    const performance =
-      totalTodos > 0 ? Math.round((doneTodos / totalTodos) * 100) : 0;
-    const pendingTodos = totalTodos - doneTodos;
-
-    return NextResponse.json({
-      doneTodos,
-      pendingTodos,
-      performance,
-      flashcardFolders,
-    });
+    const data = await DashboardService.getOverview(userId);
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Dashboard API Error:", error);
-    return NextResponse.json(
-      { error: "Database Connection Error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Lỗi Dashboard" }, { status: 500 });
   }
 }
