@@ -7,17 +7,21 @@ export const TodoService = {
     return await repo.findByDate(userId, date);
   },
 
-  // Logic gộp: Nếu có ID thì là Update, không thì là Create
   saveTodo: async (userId: number, data: any) => {
     const { id, ...rest } = data;
-    const payload = { ...rest, hocVienId: userId };
+    const payload = {
+      ...rest,
+      hocVienId: userId,
+      // Đảm bảo targetDate luôn là kiểu Date object
+      targetDate: rest.targetDate ? new Date(rest.targetDate) : undefined,
+    };
 
     return id
-      ? await repo.update(parseInt(id), payload)
+      ? await repo.update(Number(id), payload)
       : await repo.create(payload);
   },
 
-  removeTodo: async (id: number) => {
+  deleteTodo: async (id: number) => {
     return await repo.delete(id);
   },
 };
