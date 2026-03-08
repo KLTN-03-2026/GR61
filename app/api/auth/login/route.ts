@@ -10,39 +10,33 @@ export async function POST(req: NextRequest) {
 
     if (!loginResult) {
       return NextResponse.json(
-        { error: "Email hoặc mật khẩu không chính xác" },
+        { error: "Sai email hoặc mật khẩu" },
         { status: 401 },
       );
     }
 
-    const { accessToken, refreshToken, user } = loginResult;
-
     const res = NextResponse.json({
-      message: "Đăng nhập thành công",
-      user,
-      // ✅ ĐÃ XÓA csrfToken ở đây
+      message: "Thành công",
+      user: loginResult.user,
     });
 
-    const isLocalhost = process.env.NODE_ENV !== "production";
+    // Thiết lập Cookie
     const cookieOptions = {
       httpOnly: true,
-      secure: !isLocalhost,
-      sameSite: "lax" as const,
       path: "/",
+      sameSite: "lax" as const,
     };
-
-    res.cookies.set("access_token", accessToken, {
+    res.cookies.set("access_token", loginResult.accessToken, {
       ...cookieOptions,
       maxAge: 3600,
     });
-    res.cookies.set("refresh_token", refreshToken, {
+    res.cookies.set("refresh_token", loginResult.refreshToken, {
       ...cookieOptions,
       maxAge: 604800,
     });
 
     return res;
   } catch (error) {
-    console.error("Login Route Error:", error);
     return NextResponse.json({ error: "Lỗi hệ thống" }, { status: 500 });
   }
 }

@@ -1,18 +1,16 @@
-// @/lib/api/repositories/UserRepository.ts
-import { User } from "@prisma/client";
+import { user } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { BaseRepository, PrismaDelegate } from "../base/BaseRepository";
 
-export class UserRepository extends BaseRepository<User> {
+export class UserRepository extends BaseRepository<user> {
   constructor() {
-    super(prisma.user as unknown as PrismaDelegate<User>);
+    // Ép kiểu về prisma.user (viết thường)
+    super(prisma.user as unknown as PrismaDelegate<user>);
   }
 
-  // Bổ sung phương thức riêng để tìm User bằng Email
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<user | null> {
     return this.model.findUnique({
-      // Dùng Record<string, unknown> để khớp với định nghĩa Interface ở Base
-      where: { email } as Record<string, unknown>,
+      where: { email } as any,
     });
   }
 }

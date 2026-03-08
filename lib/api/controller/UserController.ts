@@ -2,10 +2,10 @@ import { BaseController } from "../base/BaseController";
 import { UserService } from "../service/UserService";
 
 import { NextRequest, NextResponse } from "next/server";
-import { User } from "@prisma/client";
+import { user } from "@prisma/client";
 import { CreateUserSchema, UpdateUserSchema } from "../schemas/UserSchemas";
 
-export class UserController extends BaseController<User> {
+export class UserController extends BaseController<user> {
   constructor() {
     super(new UserService());
   }
@@ -21,14 +21,14 @@ export class UserController extends BaseController<User> {
         {
           error: error instanceof Error ? error.message : "Lỗi không xác định",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
   };
 
   override update = async (
     id: number,
-    req: NextRequest
+    req: NextRequest,
   ): Promise<NextResponse> => {
     try {
       const body = (await req.json()) as unknown;
@@ -38,7 +38,7 @@ export class UserController extends BaseController<User> {
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : "Cập nhật thất bại" },
-        { status: 400 }
+        { status: 400 },
       );
     }
   };

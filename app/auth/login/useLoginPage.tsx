@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAxios } from "@/lib/hooks/useAxios";
-import { VaiTro } from "@prisma/client";
+import { user_vaiTro } from "@prisma/client";
 
 // Định nghĩa kiểu dữ liệu trả về từ API
 interface LoginResponse {
@@ -13,7 +13,7 @@ interface LoginResponse {
     id: number;
     hoTen: string;
     email: string;
-    vaiTro: VaiTro;
+    vaiTro: user_vaiTro;
   };
 }
 

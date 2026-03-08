@@ -1,8 +1,7 @@
-// @/app/auth/login/page.tsx
 "use client";
 
-import { LoginForm } from "./LoginForm";
 import { useLoginPage } from "./useLoginPage";
+import { LoginForm } from "./LoginForm";
 
 export default function LoginPage() {
   const { formData, error, loading, handleChange, handleSubmit } =
