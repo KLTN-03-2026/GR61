@@ -14,17 +14,17 @@ export async function POST(req: NextRequest) {
     if (!validation.success) {
       return NextResponse.json(
         { error: validation.error.format() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // 2. Gọi Service xử lý đăng ký (Lỗi TS2345 đã được giải quyết)
+    // 2. Gọi Service xử lý đăng ký
     const newUser = await authService.register(validation.data);
 
     if (!newUser) {
       return NextResponse.json(
         { error: "Email đã tồn tại trên hệ thống" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const { password, ...userWithoutPassword } = newUser;
     return NextResponse.json(
       { message: "Đăng ký tài khoản thành công", user: userWithoutPassword },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Register Route Error:", error);

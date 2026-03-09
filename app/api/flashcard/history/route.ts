@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// 1. LẤY LỊCH SỬ (Dùng cho trang History và Biểu đồ)
 export async function GET(req: Request) {
   try {
     // Lấy ID từ Header do Middleware gán
@@ -11,18 +10,18 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Truy vấn model flashcardhistory (viết thường theo kết quả db pull)
+    // Truy vấn model flashcardhistory
     const history = await prisma.flashcardhistory.findMany({
       where: { userId },
       include: {
         folder: {
-          select: { name: true }, // Lấy tên thư mục để hiển thị lên Card
+          select: { name: true },
         },
       },
       orderBy: {
-        createdAt: "desc", // Bài mới nhất hiện lên đầu
+        createdAt: "desc",
       },
-      take: 20, // Lấy 20 bài gần nhất để tránh lag biểu đồ
+      take: 50,
     });
 
     return NextResponse.json(history);
@@ -32,7 +31,6 @@ export async function GET(req: Request) {
   }
 }
 
-// 2. LƯU LỊCH SỬ (Dùng sau khi làm xong Quiz)
 export async function POST(req: Request) {
   try {
     const body = await req.json();

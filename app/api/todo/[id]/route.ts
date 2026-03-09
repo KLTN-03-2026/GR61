@@ -3,7 +3,7 @@ import { TodoService } from "@/lib/api/service/TodoService";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }, // Next.js 15 yêu cầu Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params; // Lấy ID từ URL

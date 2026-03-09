@@ -1,4 +1,3 @@
-// @/lib/hooks/useLoginPage.ts
 "use client";
 
 import { useState } from "react";
@@ -6,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAxios } from "@/lib/hooks/useAxios";
 import { user_vaiTro } from "@prisma/client";
 
-// Định nghĩa kiểu dữ liệu trả về từ API
 interface LoginResponse {
   message: string;
   user: {
@@ -21,8 +19,6 @@ export function useLoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-
-  // Sử dụng hook useAxios với kiểu dữ liệu LoginResponse
   const { fetchData, loading } = useAxios<LoginResponse>();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,14 +36,10 @@ export function useLoginPage() {
     }
 
     try {
-      // Gọi API đăng nhập
       const res = await fetchData("POST", "/api/auth/login", formData);
-
       if (!res) return;
-
       // Token đã được set tự động vào Cookie từ Server, không cần localStorage
       alert(res.message || "Đăng nhập thành công");
-
       // Điều hướng dựa trên vai trò trong Prisma 7 (Admin hoặc HocVien)
       const role = res.user.vaiTro;
       if (role === "Admin") {

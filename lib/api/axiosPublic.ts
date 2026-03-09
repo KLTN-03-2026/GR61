@@ -1,8 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-/**
- * Tạo instance axios với cấu hình cơ bản
- */
 const api: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "",
   headers: {
@@ -17,7 +14,7 @@ const api: AxiosInstance = axios.create({
  */
 export async function fetcher<T>(
   url: string,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<T> {
   const response: AxiosResponse<T> = await api.get<T>(url, config);
   return response.data;
@@ -31,7 +28,7 @@ export async function request<T>(
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
   url: string,
   data?: unknown,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<T> {
   const response: AxiosResponse<T> = await api.request<T>({
     method,

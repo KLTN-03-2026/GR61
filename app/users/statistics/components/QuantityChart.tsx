@@ -39,9 +39,9 @@ export default function QuantityChart({ data }: { data: any[] }) {
             <Line
               type="monotone"
               dataKey="completed"
-              stroke="#2563eb"
+              stroke="#16a34a"
               strokeWidth={4}
-              dot={{ r: 6, fill: "#fff", stroke: "#2563eb", strokeWidth: 3 }}
+              dot={{ r: 6, fill: "#fff", stroke: "#16a34a", strokeWidth: 3 }}
             />
           </LineChart>
         </ResponsiveContainer>

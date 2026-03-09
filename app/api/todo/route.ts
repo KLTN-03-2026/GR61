@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const data = await TodoService.getTodos(userId, date);
     return NextResponse.json(data);
   } catch (err: any) {
-    console.error("LỖI API TODO GET:", err.message); // Log lỗi chi tiết để debug
+    console.error("LỖI API TODO GET:", err.message);
     return NextResponse.json({ error: "Lỗi hệ thống" }, { status: 500 });
   }
 }

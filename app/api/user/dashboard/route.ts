@@ -3,7 +3,7 @@ import { DashboardService } from "@/lib/api/service/DashboardService";
 
 export async function GET(req: Request) {
   try {
-    const userId = parseInt(req.headers.get("x-user-id") || "0"); // Lấy từ middleware
+    const userId = parseInt(req.headers.get("x-user-id") || "0");
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

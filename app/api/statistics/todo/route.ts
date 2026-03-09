@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const type =
       (searchParams.get("type") as "week" | "month" | "year") || "week";
-    const userId = parseInt(req.headers.get("x-user-id") || "1"); // Tạm fix là 1 để test
+    const userId = parseInt(req.headers.get("x-user-id") || "0");
 
     const data = await statsService.getTodoStats(userId, type);
     return NextResponse.json(data);

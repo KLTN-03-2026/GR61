@@ -11,7 +11,6 @@ export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
   return (
     <header className="h-16 bg-white   flex items-center justify-between px-6 z-30 relative shadow-xl">
       <div className="flex items-center gap-4">
-        {/* Nút ẩn hiện Sidebar chuyên nghiệp */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 border-2 border-black rounded-lg hover:bg-slate-50 transition-all active:shadow-none"

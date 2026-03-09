@@ -1,4 +1,3 @@
-// @/lib/hooks/useRegister.ts
 "use client";
 
 import { useState } from "react";
@@ -28,7 +27,6 @@ export function useRegister() {
     if (error) setError("");
   };
 
-  // ... (phần trên giữ nguyên)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -38,14 +36,14 @@ export function useRegister() {
     }
 
     try {
-      // ✅ Chuẩn hóa dữ liệu trước khi gửi để khớp với Zod Schema
+      // Chuẩn hóa dữ liệu trước khi gửi để khớp với Zod Schema
       const payload = {
         hoTen: formData.hoTen,
         email: formData.email,
         sdt: formData.sdt || null,
         ngaySinh: formData.ngaySinh || null,
         password: formData.password,
-        vaiTro: "HocVien", // Mặc định cho trang đăng ký người dùng
+        vaiTro: "HocVien",
       };
 
       await fetchData("POST", "/api/auth/register", payload);

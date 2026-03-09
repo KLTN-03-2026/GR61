@@ -1,9 +1,7 @@
-// @/app/components/auth/RegisterForm.tsx
 "use client";
 
 import React from "react";
 
-// Định nghĩa interface rõ ràng để tránh lỗi "property does not exist"
 export interface RegisterFormData {
   hoTen: string;
   email: string;
@@ -29,7 +27,6 @@ export function RegisterForm({
 }: Props) {
   return (
     <div className="relative w-full min-h-screen overflow-y-auto bg-white py-10">
-      {/* Background Image */}
       <img
         src="/anh1.jpg"
         alt="background"

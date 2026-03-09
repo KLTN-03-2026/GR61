@@ -8,24 +8,21 @@ import {
   BookOpen,
   LayoutDashboard,
   LogOut,
+  FileText,
+  StickyNote,
 } from "lucide-react";
 
 export default function Sidebar({ isCollapsed }: { isCollapsed: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
-
-  // 1. Hàm xử lý logic Đăng xuất
   const handleLogout = async () => {
     try {
-      // Gọi API POST để xóa cookie access_token và refresh_token
       const res = await fetch("/api/auth/logout", {
         method: "POST",
       });
 
       if (res.ok) {
-        // Sau khi server xóa cookie xong, đẩy Dũng về trang đăng nhập
         router.push("/");
-        // Làm mới lại trạng thái để đảm bảo Middleware nhận diện đã đăng xuất
         router.refresh();
       }
     } catch (error) {
@@ -44,6 +41,16 @@ export default function Sidebar({ isCollapsed }: { isCollapsed: boolean }) {
       icon: <CheckSquare size={28} />,
       label: "Todo List",
       path: "/users/todo",
+    },
+    {
+      icon: <FileText size={28} />,
+      label: "Tài liệu",
+      path: "/users/documents",
+    },
+    {
+      icon: <StickyNote size={28} />,
+      label: "Ghi chú",
+      path: "/users/notes",
     },
     {
       icon: <BarChart3 size={28} />,
@@ -81,7 +88,7 @@ export default function Sidebar({ isCollapsed }: { isCollapsed: boolean }) {
         ))}
       </nav>
 
-      {/* 2. Gắn sự kiện onClick vào nút Đăng xuất */}
+      {/* 2. Nút Đăng xuất */}
       <div className="p-3 bg-white shadow-2xl border-t-2 border-gray-400">
         <button
           onClick={handleLogout}

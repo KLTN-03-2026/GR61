@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-// Định nghĩa Interface để kiểm soát dữ liệu chặt chẽ
 interface ScheduleEvent {
   id: string;
   title: string;
@@ -42,7 +41,7 @@ export function useSchedule() {
     if (storedCate) setCategories(JSON.parse(storedCate));
   }, []);
 
-  // 2. Hàm đồng bộ dữ liệu (Sync) giúp code DRY (Don't Repeat Yourself)
+  // 2. Hàm đồng bộ dữ liệu (Sync) giúp code DRY 
   const sync = useCallback((newEvs: ScheduleEvent[], newCats?: any[]) => {
     setEvents(newEvs);
     localStorage.setItem("dtu_events_final", JSON.stringify(newEvs));

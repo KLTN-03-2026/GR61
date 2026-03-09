@@ -53,7 +53,7 @@ export default function WeeklyCalendar() {
               className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 transition-all ${
                 active
                   ? "bg-green-500 text-white border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5"
-                  : "bg-white text-black border-transparent hover:border-black hover:bg-slate-50"
+                  : "bg-white text-black border-gray-300 border-2 hover:border-black hover:bg-green-100"
               }`}
             >
               {/* THỨ NẰM BÊN TRÁI */}
