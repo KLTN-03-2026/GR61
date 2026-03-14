@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAxios } from "@/lib/hooks/useAxios";
-import { user_vaiTro } from "@prisma/client";
+import { User_vaiTro } from "@prisma/client";
 
 interface LoginResponse {
   message: string;
@@ -11,7 +11,7 @@ interface LoginResponse {
     id: number;
     hoTen: string;
     email: string;
-    vaiTro: user_vaiTro;
+    vaiTro: User_vaiTro;
   };
 }
 
@@ -43,7 +43,7 @@ export function useLoginPage() {
       // Điều hướng dựa trên vai trò trong Prisma 7 (Admin hoặc HocVien)
       const role = res.user.vaiTro;
       if (role === "Admin") {
-        router.push("/giaodien/admin");
+        router.push("/admin/dashboard");
       } else {
         router.push("/users");
       }

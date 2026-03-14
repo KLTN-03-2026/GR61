@@ -6,6 +6,7 @@ import { CreateUserSchema } from "@/lib/api/schemas/UserSchemas";
 const authService = new AuthService();
 
 export async function POST(req: NextRequest) {
+  const authService = new AuthService(); // Đưa vào đây
   try {
     const body = await req.json();
 
@@ -34,8 +35,14 @@ export async function POST(req: NextRequest) {
       { message: "Đăng ký tài khoản thành công", user: userWithoutPassword },
       { status: 201 },
     );
-  } catch (error) {
-    console.error("Register Route Error:", error);
-    return NextResponse.json({ error: "Lỗi hệ thống" }, { status: 500 });
+} catch (error: any) { // Thêm : any ở đây
+    console.error("--- REGISTER ERROR DETAIL ---");
+    console.error(error); 
+    console.error("-----------------------------");
+
+    return NextResponse.json({ 
+      error: "Lỗi hệ thống", 
+      message: error.message || "Đã có lỗi xảy ra" 
+    }, { status: 500 });
   }
 }

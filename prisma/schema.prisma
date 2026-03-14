@@ -7,92 +7,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- QUẢN LÝ NGƯỜI DÙNG ---
+model User {
+  id                 Int                @id @default(autoincrement())
+  hoTen              String
+  email              String?            @unique(map: "User_email_key")
+  sdt                String?            @unique(map: "User_sdt_key")
+  ngaySinh           DateTime?
+  password           String?
+  vaiTro             User_vaiTro
+  ngayTao            DateTime           @default(now())
+  ngayCapNhat        DateTime           @updatedAt
+  admin              Admin?
+  flashcardfolders   FlashcardFolder[]
+  flashcardhistories FlashcardHistory[]
+  hocvien            Hocvien?
 
-model user {
-  id          Int               @id @default(autoincrement())
-  hoTen       String
-  email       String?           @unique(map: "User_email_key")
-  sdt         String?           @unique(map: "User_sdt_key")
-  ngaySinh    DateTime?
-  password    String?
-  vaiTro      user_vaiTro
-  ngayTao     DateTime          @default(now())
-  ngayCapNhat DateTime          @updatedAt
-
-  // Quan hệ đã khôi phục
-  hocvien            hocvien?
-  admin              admin?
-  flashcardfolders   flashcardfolder[]
-  flashcardhistories flashcardhistory[]
+  @@map("user")
 }
 
-model hocvien {
+model Hocvien {
+  id           Int            @id
+  documents    Document[]
+  user         User           @relation(fields: [id], references: [id], onDelete: Cascade, map: "fk_hocvien_user_identity")
+  notes        Note[]
+  thoigianbieu ThoiGianBieu[]
+  todos        Todo[]
+
+  @@map("hocvien")
+}
+
+model Admin {
   id   Int  @id
-  user user @relation(fields: [id], references: [id], onDelete: Cascade, map: "fk_hocvien_user_identity")
+  user User @relation(fields: [id], references: [id], onDelete: Cascade, map: "fk_admin_user_identity")
 
-  // Quan hệ 1-n
-  thoigianbieu thoigianbieu[]
-  todos        todo[]
-  documents    document[]  
-  notes        note[]      
+  @@map("admin")
 }
 
-model admin {
-  id   Int  @id
-  user user @relation(fields: [id], references: [id], onDelete: Cascade, map: "fk_admin_user_identity")
-}
-
-// --- HỆ THỐNG FLASHCARD ---
-
-model flashcardfolder {
-  id        Int      @id @default(autoincrement())
-  name      String
-  userId    Int
-  createdAt DateTime @default(now())
-
-  // Quan hệ đã khôi phục
-  user               user               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  flashcards         flashcard[]
-  flashcardhistories flashcardhistory[]
+model FlashcardFolder {
+  id         Int                @id @default(autoincrement())
+  name       String
+  userId     Int
+  createdAt  DateTime           @default(now())
+  flashcards Flashcard[]
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  histories  FlashcardHistory[]
 
   @@index([userId], map: "FlashcardFolder_userId_fkey")
+  @@map("flashcardfolder")
 }
 
-model flashcard {
-  id        Int     @id @default(autoincrement())
+model Flashcard {
+  id        Int             @id @default(autoincrement())
   front     String
   back      String
-  isStarred Boolean @default(false)
+  isStarred Boolean         @default(false)
   folderId  Int
-
-  // Quan hệ
-  folder flashcardfolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folder    FlashcardFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   @@index([folderId], map: "Flashcard_folderId_fkey")
+  @@map("flashcard")
 }
 
-model flashcardhistory {
-  id             Int      @id @default(autoincrement())
+model FlashcardHistory {
+  id             Int             @id @default(autoincrement())
   score          Float
   totalQuestions Int
   correctAnswers Int
   timeSpent      Int
   folderId       Int
   userId         Int
-  createdAt      DateTime @default(now())
-
-  // Quan hệ
-  folder flashcardfolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  user   user            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+  folder         FlashcardFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([folderId], map: "FlashcardHistory_folderId_fkey")
   @@index([userId], map: "FlashcardHistory_userId_fkey")
+  @@map("flashcardhistory")
 }
 
-// --- QUẢN LÝ HỌC TẬP ---
-
-model thoigianbieu {
+model ThoiGianBieu {
   id          Int      @id @default(autoincrement())
   tieuDe      String
   batDau      DateTime
@@ -101,66 +94,63 @@ model thoigianbieu {
   hocVienId   Int
   ngayTao     DateTime @default(now())
   ngayCapNhat DateTime @updatedAt
-
-  hocvien hocvien @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
+  hocvien     Hocvien  @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
 
   @@index([hocVienId], map: "ThoiGianBieu_hocVienId_fkey")
+  @@map("thoigianbieu")
 }
 
-model todo {
+model Todo {
   id          Int           @id @default(autoincrement())
   title       String
   description String?
   status      Boolean       @default(false)
-  priority    todo_priority @default(MEDIUM)
+  priority    Todo_priority @default(MEDIUM)
   targetDate  DateTime
   hocVienId   Int
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-
-  hocvien hocvien @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
+  hocvien     Hocvien       @relation(fields: [hocVienId], references: [id], onDelete: Cascade)
 
   @@index([hocVienId], map: "Todo_hocVienId_fkey")
   @@index([targetDate], map: "Todo_targetDate_idx")
+  @@map("todo")
 }
-// --- MODULE TÀI LIỆU ---
-model document {
+
+model Document {
   id        Int      @id @default(autoincrement())
-  title     String   
-  fileUrl   String   @db.Text 
-  fileType  String   // Ví dụ: pdf, docx, pptx
-  fileSize  String   // Ví dụ: 2.5MB
+  title     String
+  fileUrl   String   @db.Text
+  fileType  String
+  fileSize  String
   userId    Int
   createdAt DateTime @default(now())
-
-  // Quan hệ với hocvien (viết thường)
-  user      hocvien  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "fk_document_hocvien")
+  hocvien   Hocvien  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "fk_document_hocvien")
 
   @@index([userId], map: "idx_document_userId")
+  @@map("document")
 }
 
-// --- MODULE GHI CHÚ ---
-model note {
-  id          Int      @id @default(autoincrement())
-  title       String   
-  content     String   @db.LongText // Dùng LongText để lưu được nhiều nội dung
-  userId      Int      
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        hocvien  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "fk_note_hocvien")
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String   @db.LongText
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  hocvien   Hocvien  @relation(fields: [userId], references: [id], onDelete: Cascade, map: "fk_note_hocvien")
 
   @@index([userId], map: "idx_note_userId")
+  @@map("note")
 }
-// --- ENUMS ---
 
-enum todo_priority {
+enum Todo_priority {
   LOW
   MEDIUM
   HIGH
 }
 
-enum user_vaiTro {
+enum User_vaiTro {
   HocVien
   Admin
 }

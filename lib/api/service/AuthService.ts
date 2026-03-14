@@ -1,7 +1,7 @@
 import { UserRepository } from "../repositories/UserRepository";
 import { jwtService } from "./jwt.service";
 import bcrypt from "bcryptjs";
-import { user_vaiTro, user } from "@prisma/client";
+import { User } from "@prisma/client"; 
 import { CreateUserDto } from "../schemas/UserSchemas";
 
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
     this.userRepository = new UserRepository();
   }
 
-  async register(data: CreateUserDto): Promise<user | null> {
+  async register(data: CreateUserDto): Promise<User | null> {
     if (data.email) {
       const existing = await this.userRepository.findByEmail(data.email);
       if (existing) return null;
@@ -20,17 +20,21 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
+    // Dùng string trực tiếp thay vì Enum để tránh lỗi "undefined"
+    const targetRole = data.vaiTro || "HocVien"; 
+
     const createData = {
       hoTen: data.hoTen,
       email: data.email ?? null,
       password: hashedPassword,
-      vaiTro: data.vaiTro || user_vaiTro.HocVien,
+      vaiTro: targetRole,
 
-      // Dùng hocvien (viết thường) khớp với Schema
-      ...((data.vaiTro || user_vaiTro.HocVien) === user_vaiTro.HocVien && {
+      // Kiểm tra bằng chuỗi "HocVien"
+      ...(targetRole === "HocVien" && {
         hocvien: { create: {} },
       }),
-      ...(data.vaiTro === user_vaiTro.Admin && {
+      // Kiểm tra bằng chuỗi "Admin"
+      ...(targetRole === "Admin" && {
         admin: { create: {} },
       }),
     };
