@@ -8,7 +8,6 @@ export const apiSecure = axios.create({
   withCredentials: true,
 });
 
-// ❌ XÓA BỎ TOÀN BỘ interceptor liên quan đến CSRF ở đây
 // Chúng ta chỉ giữ lại instance để gửi kèm Cookie là đủ
 
 export async function requestSecure<TResponse = unknown, TData = unknown>(

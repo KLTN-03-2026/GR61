@@ -2,10 +2,10 @@ import { BaseController } from "../base/BaseController";
 import { UserService } from "../service/UserService";
 
 import { NextRequest, NextResponse } from "next/server";
-import { user } from "@prisma/client";
+import { User } from "@prisma/client";
 import { CreateUserSchema, UpdateUserSchema } from "../schemas/UserSchemas";
 
-export class UserController extends BaseController<user> {
+export class UserController extends BaseController<User> {
   constructor() {
     super(new UserService());
   }

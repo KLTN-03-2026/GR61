@@ -12,17 +12,19 @@ export const DashboardService = {
     const todayTodos = await todoRepo.findByDateRange(userId, start, end);
 
     // 2. Lấy số lượng thư mục Flashcard
-    const folderCount = await prisma.flashcardfolder.count({
+    const folderCount = await prisma.flashcardFolder.count({
       where: { userId },
     });
 
-    // 3. Tính toán hiệu suất (Performance) dựa trên lịch sử bài làm gần nhất
-    const recentHistory = await prisma.flashcardhistory.findMany({
+    // 3. Tính toán hiệu suất (Performance)
+    // SỬA Ở ĐÂY: Truy vấn từ bảng flashcardHistory thay vì flashcardFolder
+    const recentHistory = await prisma.flashcardHistory.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
       take: 5,
     });
 
+    // Tính điểm trung bình của 5 bài gần nhất
     const avgScore =
       recentHistory.length > 0
         ? Math.round(

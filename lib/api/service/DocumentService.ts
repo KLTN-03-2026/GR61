@@ -1,5 +1,4 @@
 import { DocumentRepository } from "../repositories/DocumentRepository";
-import { document } from "@prisma/client";
 
 export class DocumentService {
   private documentRepo = new DocumentRepository();

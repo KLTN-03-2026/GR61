@@ -119,6 +119,31 @@ export default function FlashcardHistoryPage() {
               </AreaChart>
             ) : (
               <BarChart data={chartData}>
+                {/* Đã thêm đầy đủ trục và Tooltip cho BarChart */}
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#f1f5f9"
+                />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <YAxis
+                  allowDecimals={false} // Số bài thì không được có số thập phân
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 9, fontWeight: 900 }}
+                />
+                <Tooltip
+                  cursor={{ fill: "#f8fafc" }} // Màu nền nhạt khi hover vào cột
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "2px solid #16a34a",
+                  }}
+                />
                 <Bar dataKey="count" fill="#16a34a" radius={[6, 6, 0, 0]} />
               </BarChart>
             )}
