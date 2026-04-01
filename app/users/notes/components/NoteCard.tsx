@@ -13,7 +13,7 @@ export default function NoteCard({
 
   return (
     <div
-      onClick={() => onView(note)} // CLICK VÀO CARD ĐỂ MỞ CHI TIẾT
+      onClick={() => onView(note)}
       style={{ backgroundColor: bgColor }}
       className="group relative flex flex-col h-full p-6 border-[3px] border-black rounded-[24px] shadow-[8px_8px_0px_0px_#000] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_#000] cursor-pointer"
     >
@@ -25,7 +25,7 @@ export default function NoteCard({
           onClick={(e) => {
             e.stopPropagation();
             onTogglePin(note.id, note.isPinned);
-          }} // KHÔNG GỌI onView KHI BẤM GHIM
+          }}
           className={`p-2 border-2 border-black rounded-full transition-all bg-white hover:scale-110 active:scale-95 flex-shrink-0 ${
             note.isPinned
               ? "text-yellow-500 shadow-[2px_2px_0px_0px_#000]"

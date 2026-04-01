@@ -12,20 +12,17 @@ export default function CategoryModal({
   const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!isOpen) return null;
-
-  // Xử lý cả THÊM MỚI và CẬP NHẬT
   const handleSave = () => {
     if (!newCatName.trim()) return;
 
     if (editingId) {
-      // Đang ở chế độ Sửa
       const updatedCats = categories.map((c: any) =>
         c.id === editingId
           ? { ...c, name: newCatName.toUpperCase(), color: newCatColor }
           : c,
       );
       syncCategories(updatedCats);
-      setEditingId(null); // Reset
+      setEditingId(null);
     } else {
       // Tạo mới
       const newCat = {
@@ -92,8 +89,6 @@ export default function CategoryModal({
             {editingId ? <Check size={20} /> : <Plus size={20} />}
           </button>
         </div>
-
-        {/* Danh sách */}
         <div className="space-y-3 max-h-60 overflow-y-auto no-scrollbar">
           {categories.map((cat: any) => (
             <div

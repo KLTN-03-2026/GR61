@@ -17,7 +17,6 @@ export class TodoRepository {
     });
   }
 
-  // Lấy Todo trong khoảng ngày (Dùng cho Thống kê)
   async findByDateRange(userId: number, start: Date, end: Date) {
     return await prisma.todo.findMany({
       where: {

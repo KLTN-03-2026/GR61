@@ -7,7 +7,6 @@ export class NoteRepository extends BaseRepository<Note> {
     super(prisma.note as any);
   }
 
-  // Ghi đè hoặc thêm hàm lấy theo userId, sắp xếp ghim lên đầu và mới nhất
   async findByUserId(userId: number) {
     return prisma.note.findMany({
       where: { userId },

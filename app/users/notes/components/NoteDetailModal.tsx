@@ -7,10 +7,8 @@ export default function NoteDetailModal({
   categories,
 }: any) {
   if (!isOpen || !note) return null;
-
-  // Lấy màu nền theo thể loại
   const categoryInfo = categories.find((c: any) => c.name === note.category);
-  const bgColor = categoryInfo ? categoryInfo.color : "#ffffff";
+  const bgColor = categoryInfo ? categoryInfo.color : "bg-white";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm animate-in fade-in">

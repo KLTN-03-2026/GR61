@@ -24,7 +24,7 @@ export default function NotePage() {
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
   const [editingNote, setEditingNote] = useState<any>(null);
-  const [viewingNote, setViewingNote] = useState<any>(null); // STATE XEM CHI TIẾT
+  const [viewingNote, setViewingNote] = useState<any>(null);
 
   const filteredNotes = useMemo(() => {
     return (
@@ -57,18 +57,13 @@ export default function NotePage() {
           <h1 className="text-5xl font-black uppercase italic tracking-tighter mb-2">
             Kho Ghi Chú
           </h1>
-          <p className="font-bold text-slate-500 italic text-sm">
-            Quản lý kiến thức theo màu sắc
-          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-          {/* ĐÃ XÓA Ô TÌM KIẾM TẠI ĐÂY */}
-
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
-            className="px-4 py-3 bg-green-500 text-white border-[3px] border-black rounded-2xl font-black uppercase italic shadow-[4px_4px_0px_0px_#000] cursor-pointer focus:outline-none"
+            className="px-4 py-3 bg-white text-black border-[3px]  border-black rounded-2xl font-black uppercase italic shadow-[4px_4px_0px_0px_#000] cursor-pointer focus:outline-none"
           >
             <option value="ALL">THỂ LOẠI</option>
             {categories.map((c: any) => (
@@ -103,7 +98,7 @@ export default function NotePage() {
             <NoteCard
               note={note}
               categories={categories}
-              onView={(n: any) => setViewingNote(n)} // TRUYỀN HÀM XEM CHI TIẾT
+              onView={(n: any) => setViewingNote(n)}
               onEdit={(n: any) => {
                 setEditingNote(n);
                 setIsNoteModalOpen(true);
@@ -139,7 +134,6 @@ export default function NotePage() {
         syncCategories={syncCategories}
       />
 
-      {/* RENDER MODAL CHI TIẾT */}
       <NoteDetailModal
         isOpen={!!viewingNote}
         onClose={() => setViewingNote(null)}
