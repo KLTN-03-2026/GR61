@@ -44,7 +44,7 @@ export default function NoteCard({
         {note.title}
       </h3>
 
-      <p className="text-sm font-bold text-slate-800 line-clamp-4 mb-6 whitespace-pre-wrap flex-1">
+      <p className="text-sm font-bold text-slate-800 line-clamp-1 mb-6 whitespace-pre-wrap flex-1">
         {note.content}
       </p>
 

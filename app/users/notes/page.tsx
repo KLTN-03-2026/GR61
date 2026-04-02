@@ -5,7 +5,7 @@ import { useNote } from "./hooks/useNote";
 import NoteCard from "./components/NoteCard";
 import NoteModal from "./components/NoteModal";
 import CategoryModal from "./components/CategoryModal";
-import NoteDetailModal from "./components/NoteDetailModal"; // IMPORT MODAL MỚI
+import NoteDetailModal from "./components/NoteDetailModal";
 
 export default function NotePage() {
   const {
@@ -27,19 +27,17 @@ export default function NotePage() {
   const [viewingNote, setViewingNote] = useState<any>(null);
 
   const filteredNotes = useMemo(() => {
-    return (
-      notes
-        .filter(
-          (n: any) => activeCategory === "ALL" || n.category === activeCategory,
-        )
-        // ĐÃ XÓA LỌC THEO TÌM KIẾM
-        .sort((a: any, b: any) => {
-          if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-          return (
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-          );
-        })
-    );
+    return notes
+      .filter(
+        (n: any) => activeCategory === "ALL" || n.category === activeCategory,
+      )
+
+      .sort((a: any, b: any) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        return (
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+      });
   }, [notes, activeCategory]);
 
   if (isLoading && notes.length === 0) {
