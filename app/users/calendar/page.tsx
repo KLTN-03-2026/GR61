@@ -57,7 +57,7 @@ export default function SchedulePage() {
                 : e,
             ),
           );
-          notifier.info(
+          notifier.success(
             "Đã dời lịch!",
             "Thời gian hoạt động đã được thay đổi.",
           );

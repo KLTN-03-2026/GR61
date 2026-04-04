@@ -20,8 +20,8 @@ export default function ScheduleView({
         editable={true}
         select={onDateSelect}
         eventClick={onEventClick}
-        eventDrop={(info) => onEventChange(info.event)} // xử lý kéo thả
-        eventResize={(info) => onEventChange(info.event)} // xử lý co giãn thời gian
+        eventDrop={(info) => onEventChange(info.event)}
+        eventResize={(info) => onEventChange(info.event)}
         dayHeaderFormat={{
           weekday: "long",
           day: "2-digit",
@@ -36,12 +36,14 @@ export default function ScheduleView({
         locale="vi"
         events={events}
         height="auto"
-        // Nội dung thẻ thởi gian biểu
         eventContent={(info) => (
-          <div className="p-1.5 flex flex-col gap-0.5 overflow-hidden text-white italic h-full">
+          <div
+            className="p-1.5 flex flex-col gap-0.5 overflow-hidden text-white italic h-full w-full"
+            style={{ backgroundColor: info.event.backgroundColor }}
+          >
             {/* Hiện giờ */}
             <div className="text-[8px] font-black opacity-90 flex items-center gap-1">
-              <span className="bg-white/20 px-1 rounded border border-white/30 uppercase">
+              <span className="px-1 rounded border border-white/30 uppercase">
                 {info.timeText}
               </span>
             </div>
@@ -62,7 +64,7 @@ export default function ScheduleView({
       />
 
       <style jsx global>{`
-        /* Nút điều hướng Green-600 viền 2px */
+        /* Nút điều hướng - Giữ nguyên xanh lá làm chủ đạo hệ thống */
         .fc-button-primary {
           background-color: #16a34a !important;
           border: 2px solid black !important;
@@ -80,21 +82,27 @@ export default function ScheduleView({
           padding: 10px 0;
         }
 
-        /* Thẻ sự kiện: Viền mỏng 2px đồng bộ phong cách Dũng */
+        /* THẺ SỰ KIỆN: KHÔNG FIX CỨNG MÀU NỮA */
         .fc-event {
+          /* background-color: #16a34a !important; 
           border: 2px solid black !important;
           border-radius: 12px !important;
           cursor: grab;
           transition: transform 0.2s ease;
+          overflow: hidden;
         }
+
+        /* Đảm bảo khung nội dung cũng nhận màu động */
+        .fc-event-main {
+          padding: 0 !important;
+          background-color: transparent !important;
+        }
+
         .fc-event:hover {
           transform: scale(1.02);
         }
 
-        /* Ẩn bớt các ký hiệu thừa của mặc định FullCalendar */
-        .fc-event-time {
-          display: none;
-        }
+        .fc-event-time,
         .fc-event-title {
           display: none;
         }
