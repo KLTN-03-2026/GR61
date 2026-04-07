@@ -12,10 +12,7 @@ interface HeaderProps {
 }
 
 export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
-  // Lấy dữ liệu profile từ API
   const { data: profile } = useSWR("/api/user/profile", fetcher);
-
-  // Logic hiển thị: Nếu chưa có data thì hiện "Đang tải...", có rồi thì hiện tên thật
   const hoTen = profile?.hoTen || "Đang tải...";
   const roleText =
     profile?.vaiTro === "ADMIN" ? "Admin @ DTU" : "Student @ DTU";
@@ -51,13 +48,11 @@ export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
           </span>
         </button>
 
-        {/* CLICK VÀO ĐÂY LÀ QUA TRANG THÔNG TIN CÁ NHÂN */}
         <Link
           href="/users/profile"
           className="flex items-center gap-3 pl-4 border-l-2 border-slate-100 cursor-pointer group select-none transition-all"
         >
           <div className="text-right hidden sm:block">
-            {/* Tên người dùng hiện ở đây */}
             <p className="text-xs font-black uppercase leading-none group-hover:text-green-600 transition-colors">
               {hoTen}
             </p>
@@ -67,11 +62,11 @@ export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
           </div>
 
           <div className="relative">
-            <img
+            {/* <img
               src={avatarUrl}
               alt="Avatar"
               className="w-10 h-10 object-cover bg-green-50 border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] group-hover:translate-x-[0.5px] group-hover:translate-y-[0.5px] group-hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-            />
+            /> */}
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
           </div>
         </Link>

@@ -26,9 +26,11 @@ export default function DocumentPage() {
     setOriginalUrl(url);
 
     if (t.includes("pdf")) {
+      // Nếu là PDF thì trình duyệt tự đọc được
       setPreviewUrl(url);
     } else {
       setPreviewUrl(
+        // Nhúng link vào service của Microsoft
         `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`,
       );
     }

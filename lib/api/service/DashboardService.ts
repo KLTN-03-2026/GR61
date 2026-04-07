@@ -17,7 +17,6 @@ export const DashboardService = {
     });
 
     // 3. Tính toán hiệu suất (Performance)
-    // SỬA Ở ĐÂY: Truy vấn từ bảng flashcardHistory thay vì flashcardFolder
     const recentHistory = await prisma.flashcardHistory.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },

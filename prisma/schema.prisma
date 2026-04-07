@@ -76,7 +76,7 @@ model FlashcardHistory {
   totalQuestions Int
   correctAnswers Int
   timeSpent      Int
-  details        Json?           // Đã chọn bản Json để lưu chi tiết bài thi xịn hơn
+  details        Json?           
   folderId       Int
   userId         Int
   createdAt      DateTime        @default(now())

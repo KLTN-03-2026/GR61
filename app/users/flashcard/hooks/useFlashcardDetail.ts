@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import axios from "axios";
-import { notifier } from "@/lib/notifier"; // Thêm notifier
+import { notifier } from "@/lib/notifier";
 
 export function useFlashcardDetail(cards: any[], mutate: any) {
   const [index, setIndex] = useState(0);

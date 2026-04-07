@@ -14,7 +14,7 @@ export default function SchedulePage() {
   // Logic xử lý lưu
   const handleSave = () => {
     if (!form.title.trim()) {
-      notifier.error("Thiếu thông tin!", "Dũng ơi, nhập tên hoạt động đã nhé.");
+      notifier.error("Thiếu thông tin!", "Bạn ơi, nhập tên hoạt động đã nhé.");
       return;
     }
 
