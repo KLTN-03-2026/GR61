@@ -1,4 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { extractOnlyText } from "@/lib/extractor";
+import prisma from "@/lib/prisma";
 
 const f = createUploadthing();
 
@@ -12,11 +14,32 @@ export const ourFileRouter = {
       return { userId: 2 }; 
     })
   .onUploadComplete(async ({ metadata, file }) => {
-    console.log("Upload hoàn tất. URL file tại Cloud:", file.url);
-    const fileUrl = file.url;
-    const fileName = file.name;
-    return { url: file.url };
-  }),
-} satisfies FileRouter;
+      console.log("Đang xử lý file:", file.name);
+      const textContent = await extractOnlyText(file.url, file.name, file.type);
+      let displayType = file.type;
+      if (file.name.toLowerCase().endsWith(".pdf")) displayType = "PDF";
+      else if (file.name.toLowerCase().endsWith(".docx")) displayType = "DOCX";
+      else displayType = "DOC"
+      
+      // 🔥 Gọi hàm trích xuất (Không dùng await để nó chạy ngầm, không làm chậm upload)
+      try {
+      const textContent = await extractOnlyText(file.url, file.name, file.type);
+      console.log("Độ dài chữ:", textContent?.length || 0);
+      const newDoc = await prisma.document.create({
+        data: {
+          title: file.name,
+          fileUrl: file.url,
+          fileType: file.type || "unknown",
+          fileSize: (file.size / 1024 / 1024).toFixed(2) + " MB",
+          content: textContent,
+          userId: metadata.userId,
+        },
+      });
+    console.log("Đã lưu vào DB thành công!", newDoc.id);
+  } catch (error: any) {
+    console.error("Lỗi tại core.ts:", error.message);
+  }
 
-export type OurFileRouter = typeof ourFileRouter;
+  return { uploadedBy: metadata.userId };
+})
+} satisfies FileRouter;

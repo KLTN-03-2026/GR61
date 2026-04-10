@@ -176,6 +176,15 @@ model ChatHistory {
 
   @@map("chathistory")
 }
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  email     String   
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
 
 enum Todo_priority {
   LOW

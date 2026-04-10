@@ -47,15 +47,26 @@ export function LoginForm({
               className="p-4 rounded bg-[rgb(150,200,241)] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(255,255,255)]"
             />
 
-            <input
-              type="password"
-              name="password"
-              required
-              value={formData.password}
-              onChange={onChange}
-              placeholder="Mật khẩu"
-              className="p-4 rounded bg-[rgb(150,200,241)] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(255,255,255)]"
-            />
+            <div className="flex flex-col gap-2">
+              <input
+                type="password"
+                name="password"
+                required
+                value={formData.password}
+                onChange={onChange}
+                placeholder="Mật khẩu"
+                className="p-4 rounded bg-[rgb(150,200,241)] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(255,255,255)]"
+              />
+              {/* Thêm phần Quên mật khẩu ở đây */}
+              <div className="flex justify-end">
+                <a 
+                  href="/auth/forgot-password" 
+                  className="text-white text-xs hover:underline opacity-80"
+                >
+                  Quên mật khẩu?
+                </a>
+              </div>
+            </div>
 
             <button
               type="submit"

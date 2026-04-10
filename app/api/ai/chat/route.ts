@@ -70,7 +70,7 @@ export async function POST(req: Request) {
         aiResponse = res2.data.candidates[0].content.parts[0].text;
       } catch (e) {
         console.error("Lỗi SQL:", e);
-        aiResponse = "Tui định tra cứu DB mà bị lỗi SQL mất rồi bro!";
+        aiResponse = "Lỗi ";
       }
     }
 
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply: aiResponse });
 
   } catch (error: any) {
-    console.log("LỖI THẬT NÈ BRO:", JSON.stringify(error.response?.data, null, 2));
-    return NextResponse.json({ reply: "Lỗi kết nối AI rồi bro! Kiểm tra lại Model hoặc API Key nhé." }, { status: 500 });
+    console.log("LỖI THẬT:", JSON.stringify(error.response?.data, null, 2));
+    return NextResponse.json({ reply: "Lỗi kết nối AI! Kiểm tra lại Model hoặc API Key nhé." }, { status: 500 });
   }
 }
