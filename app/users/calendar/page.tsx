@@ -5,13 +5,12 @@ import ScheduleHeader from "./components/ScheduleHeader";
 import ScheduleView from "./components/ScheduleView";
 import EventModal from "./components/EventModal";
 import CategoryModal from "./components/CategoryModal";
-import { notifier } from "@/lib/notifier"; // Import notifier
+import { notifier } from "@/lib/notifier";
 
 export default function SchedulePage() {
   const { events, categories, popups, setPopups, form, setForm, sync } =
     useSchedule();
 
-  // Logic xử lý lưu
   const handleSave = () => {
     if (!form.title.trim()) {
       notifier.error("Thiếu thông tin!", "Bạn ơi, nhập tên hoạt động đã nhé.");
@@ -19,17 +18,45 @@ export default function SchedulePage() {
     }
 
     const cate = categories.find((c) => c.id === form.categoryId);
-    const data = { ...form, backgroundColor: cate?.color || "#16a34a" };
+    const baseData = { ...form, backgroundColor: cate?.color || "#16a34a" };
 
     if (popups.add) {
-      sync([...events, { ...data, id: crypto.randomUUID() }]);
-      notifier.success("Tuyệt vời!", "Đã thêm lịch học mới vào hệ thống.");
+      // LOGIC: TẠO HÀNG LOẠT TRONG 1 TUẦN (7 NGÀY)
+      if (form.days && form.days.length > 0) {
+        const recurringEvents: any[] = [];
+        const startBase = new Date(form.start);
+        const endBase = new Date(form.end);
+        const duration = endBase.getTime() - startBase.getTime();
+
+        // Vòng lặp giới hạn trong 7 ngày tới
+        for (let i = 0; i < 7; i++) {
+          const current = new Date(startBase);
+          current.setDate(startBase.getDate() + i);
+
+          if (form.days.includes(current.getDay())) {
+            const newStart = new Date(current);
+            const newEnd = new Date(newStart.getTime() + duration);
+
+            recurringEvents.push({
+              ...baseData,
+              id: crypto.randomUUID(),
+              start: newStart.toISOString(),
+              end: newEnd.toISOString(),
+            });
+          }
+        }
+        sync([...events, ...recurringEvents]);
+        notifier.success(
+          "Thành công!",
+          `Đã lặp lại ${recurringEvents.length} hoạt động trong tuần.`,
+        );
+      } else {
+        sync([...events, { ...baseData, id: crypto.randomUUID() }]);
+        notifier.success("Tuyệt vời!", "Đã thêm lịch học mới.");
+      }
     } else {
-      sync(events.map((e) => (e.id === form.id ? data : e)));
-      notifier.success(
-        "Cập nhật thành công!",
-        "Thông tin lịch trình đã thay đổi.",
-      );
+      sync(events.map((e) => (e.id === form.id ? baseData : e)));
+      notifier.success("Cập nhật thành công!");
     }
 
     setPopups({ ...popups, add: false, edit: false });
@@ -46,7 +73,6 @@ export default function SchedulePage() {
   return (
     <div className="p-8 space-y-4 bg-white min-h-screen no-scrollbar">
       <ScheduleHeader onOpenCate={() => setPopups({ ...popups, cate: true })} />
-
       <ScheduleView
         events={events}
         onEventChange={(fc: any) => {
@@ -57,10 +83,7 @@ export default function SchedulePage() {
                 : e,
             ),
           );
-          notifier.success(
-            "Đã dời lịch!",
-            "Thời gian hoạt động đã được thay đổi.",
-          );
+          notifier.success("Đã dời lịch!", "Thời gian đã thay đổi.");
         }}
         onDateSelect={(info: any) => {
           setForm({
@@ -70,18 +93,18 @@ export default function SchedulePage() {
             end: info.endStr.slice(0, 16),
             note: "",
             categoryId: "1",
+            days: [],
           });
           setPopups({ ...popups, add: true });
         }}
         onEventClick={(info: any) => {
           const found = events.find((e) => e.id === info.event.id);
           if (found) {
-            setForm(found);
+            setForm({ ...found, days: [] });
             setPopups({ ...popups, edit: true });
           }
         }}
       />
-
       {(popups.add || popups.edit) && (
         <EventModal
           type={popups.add ? "add" : "edit"}
@@ -93,7 +116,6 @@ export default function SchedulePage() {
           onDelete={handleDelete}
         />
       )}
-
       {popups.cate && (
         <CategoryModal
           categories={categories}

@@ -18,6 +18,7 @@ export default function ScheduleView({
         initialView="timeGridWeek"
         selectable={true}
         editable={true}
+        firstDay={1} // MỚI: Đặt Thứ 2 là ngày bắt đầu trong tuần
         select={onDateSelect}
         eventClick={onEventClick}
         eventDrop={(info) => onEventChange(info.event)}
@@ -80,11 +81,11 @@ export default function ScheduleView({
           font-size: 13px;
           text-transform: capitalize;
           padding: 10px 0;
+          text-decoration: none !important;
         }
 
-        /* THẺ SỰ KIỆN: KHÔNG FIX CỨNG MÀU NỮA */
+        /* THẺ SỰ KIỆN */
         .fc-event {
-          /* background-color: #16a34a !important; 
           border: 2px solid black !important;
           border-radius: 12px !important;
           cursor: grab;
@@ -92,7 +93,6 @@ export default function ScheduleView({
           overflow: hidden;
         }
 
-        /* Đảm bảo khung nội dung cũng nhận màu động */
         .fc-event-main {
           padding: 0 !important;
           background-color: transparent !important;
@@ -104,6 +104,11 @@ export default function ScheduleView({
 
         .fc-event-time,
         .fc-event-title {
+          display: none;
+        }
+
+        /* Ẩn dấu chấm tròn mặc định trong lịch tháng */
+        .fc-daygrid-event-dot {
           display: none;
         }
       `}</style>

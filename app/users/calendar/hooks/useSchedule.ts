@@ -24,6 +24,7 @@ export function useSchedule() {
     edit: false,
     cate: false,
   });
+
   const [form, setForm] = useState({
     id: "",
     title: "",
@@ -31,9 +32,10 @@ export function useSchedule() {
     end: "",
     note: "",
     categoryId: "1",
+    days: [] as number[], // Lưu danh sách các thứ lặp lại (0: CN, 1: T2...)
   });
 
-  // 1. Khôi phục dữ liệu từ LocalStorage khi khởi tạo . 
+  // Khôi phục dữ liệu từ LocalStorage
   useEffect(() => {
     const stored = localStorage.getItem("dtu_events_final");
     const storedCate = localStorage.getItem("dtu_cats_final");
@@ -41,7 +43,6 @@ export function useSchedule() {
     if (storedCate) setCategories(JSON.parse(storedCate));
   }, []);
 
-  // 2. Hàm đồng bộ dữ liệu (Sync) giúp code DRY 
   const sync = useCallback((newEvs: ScheduleEvent[], newCats?: any[]) => {
     setEvents(newEvs);
     localStorage.setItem("dtu_events_final", JSON.stringify(newEvs));

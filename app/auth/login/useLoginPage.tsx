@@ -37,23 +37,24 @@ export function useLoginPage() {
 
     try {
       const res = await fetchData("POST", "/api/auth/login", formData);
-      
+
       if (res && res.user) {
-        // ✅ 1. Lưu đúng object user (có id và hoTen) vào máy
-        localStorage.setItem("user", JSON.stringify(res.user)); 
+        //  1. Lưu đúng object user (có id và hoTen) vào máy
+        localStorage.setItem("user", JSON.stringify(res.user));
 
         alert(res.message || "Đăng nhập thành công");
 
-        // ✅ 2. Điều hướng dựa trên vai trò
+        //  2. Điều hướng dựa trên vai trò
         const role = res.user.vaiTro;
         if (role === "Admin") {
           router.push("/admin/dashboard");
         } else {
-          router.push("/users/documents"); // Hoặc /users tùy bro
+          router.push("/users"); // Hoặc /users tùy bro
         }
       }
     } catch (err: any) {
-      const serverMessage = err.response?.data?.error || "Email hoặc mật khẩu không chính xác";
+      const serverMessage =
+        err.response?.data?.error || "Email hoặc mật khẩu không chính xác";
       setError(serverMessage);
     }
   };
