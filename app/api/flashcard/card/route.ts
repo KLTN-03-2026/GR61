@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FlashcardService } from "@/lib/api/service/FlashcardService";
 import prisma from "@/lib/prisma";
+import { notificationService } from "@/lib/notification-service";
 
 const service = new FlashcardService();
 
@@ -28,7 +29,13 @@ export async function POST(req: Request) {
         type: "CREATE",
       }
     });
-  }
+    await notificationService.create({
+        userId,
+        title: "THÊM THẺ MỚI",
+        message: `Thẻ "${card.front}" đã được thêm vào bộ sưu tập của Bạn.`,
+        type: "SUCCESS",
+      });
+    }
   return NextResponse.json(card);
 }
 
@@ -48,6 +55,12 @@ export async function PATCH(req: Request) {
         type: "UPDATE",
       }
     });
+    await notificationService.create({
+        userId,
+        title: "CẬP NHẬT THẺ",
+        message: `Nội dung thẻ "${card.front}" đã được thay đổi thành công.`,
+        type: "INFO",
+      });
   }
   return NextResponse.json(card);
 }
@@ -71,6 +84,12 @@ export async function DELETE(req: Request) {
         type: "DELETE",
       }
     });
+    await notificationService.create({
+        userId,
+        title: "XÓA THẺ HỌC",
+        message: `Bạn đã gỡ bỏ thẻ "${cardToDelete.front}" khỏi bộ nhớ.`,
+        type: "WARN",
+      });
   }
   return NextResponse.json({ message: "Đã xóa thẻ" });
 }

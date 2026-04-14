@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DocumentService } from "@/lib/api/service/DocumentService";
 import prisma from "@/lib/prisma";
+import { notificationService } from "@/lib/notification-service";
 
 const service = new DocumentService();
 
@@ -42,16 +43,25 @@ export async function POST(req: NextRequest) {
     });
 
     // Ghi Audit Log 
-    await prisma.auditLog.create({
-      data: {
-        userId: userId,
-        userName: userName, 
-        action: "TẢI TÀI LIỆU",
-        table: "DOCUMENT",
-        detail: `Đã tải lên tài liệu mới: ${newDoc.title}`,
-        type: "SUCCESS", 
-      },
-    });
+    if (newDoc) {
+      await prisma.auditLog.create({
+        data: {
+          userId: userId,
+          userName: userName, 
+          action: "TẢI TÀI LIỆU",
+          table: "DOCUMENT",
+          detail: `Đã tải lên tài liệu mới: ${newDoc.title}`,
+          type: "SUCCESS", 
+        },
+      });
+
+      await notificationService.create({
+        userId,
+        title: "TẢI TÀI LIỆU THÀNH CÔNG",
+        message: `Tài liệu "${newDoc.title}" đã được lưu trữ. Bạn có thể nhờ Smart Study AI tóm tắt file này rồi đó! 📄`,
+        type: "SUCCESS",
+      });
+    }
 
     return NextResponse.json(newDoc, { status: 201 });
   } catch (error: any) {

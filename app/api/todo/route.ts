@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { TodoService } from "@/lib/api/service/TodoService";
 import prisma from "@/lib/prisma";
+import { notificationService } from "@/lib/notification-service";
 
 export async function GET(req: Request) {
   try {
@@ -43,7 +44,16 @@ export async function POST(req: Request) {
           type: "CREATE",
         }
       });
-    }
+      const isCompleted = body.status === true;
+      await notificationService.create({
+        userId: userId, 
+        title: isCompleted ? "HOÀN THÀNH NHIỆM VỤ" : (body.id ? "CẬP NHẬT TODO" : "TODO MỚI"),
+        message: isCompleted 
+          ? `Chúc mừng! Bạn đã hoàn thành: ${data.title} 🎉` 
+          : `Công việc "${data.title}" đã được ghi nhận.`,
+        type: isCompleted ? "SUCCESS" : "INFO",
+      });
+    } 
     return NextResponse.json(data);
   } catch (err: any) {
     console.error("LỖI API TODO POST:", err.message);

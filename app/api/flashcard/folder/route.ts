@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { FlashcardService } from "@/lib/api/service/FlashcardService";
+import { notificationService } from "@/lib/notification-service";
 
 const service = new FlashcardService();
 export async function GET(req: Request) {
@@ -52,7 +53,12 @@ export async function POST(req: Request) {
           type: "CREATE",
         }
       });
-      console.log("Đã ghi log tạo bộ thẻ thành công!");
+      await notificationService.create({
+        userId,
+        title: "TẠO BỘ THẺ MỚI",
+        message: `Bộ thẻ "${name}" đã được tạo thành công. Bắt đầu thêm thẻ để học thôi nào! 📚`,
+        type: "SUCCESS",
+      });
     }
 
     return NextResponse.json(newFolder);
@@ -60,7 +66,53 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, name } = body; // Lấy ID thư mục và Tên mới
+    const userId = parseInt(req.headers.get("x-user-id") || "0");
 
+    if (!id || !name) {
+      return NextResponse.json({ error: "Thiếu thông tin cập nhật" }, { status: 400 });
+    }
+
+    const updatedFolder = await prisma.flashcardFolder.update({
+      where: { id: parseInt(id) },
+      data: { name: name }
+    });
+
+    if (updatedFolder && userId > 0) {
+      const user = await prisma.user.findUnique({ 
+        where: { id: userId }, 
+        select: { hoTen: true } 
+      });
+
+      // 2. Ghi AuditLog cho Admin
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          userName: user?.hoTen || "Học viên",
+          action: "SỬA THƯ MỤC",
+          table: "flashcardfolder",
+          detail: `Đã đổi tên thư mục thành: ${name}`,
+          type: "UPDATE",
+        }
+      });
+
+      await notificationService.create({
+        userId,
+        title: "CẬP NHẬT THƯ MỤC",
+        message: `Thư mục của Bạn đã được đổi tên thành "${name}" thành công!`,
+        type: "INFO",
+      });
+    }
+
+    return NextResponse.json(updatedFolder);
+  } catch (error: any) {
+    console.error("LỖI SỬA THƯ MỤC:", error.message);
+    return NextResponse.json({ error: "Không thể cập nhật thư mục" }, { status: 500 });
+  }
+}
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -90,7 +142,12 @@ export async function DELETE(req: Request) {
           type: "DELETE", 
         }
       });
-      console.log("Đã ghi log xóa bộ thẻ thành công!");
+      await notificationService.create({
+        userId,
+        title: "XÓA BỘ THẺ",
+        message: `Bạn đã xóa bộ thẻ "${folderToDelete.name}" cùng toàn bộ các thẻ bên trong.`,
+        type: "WARN",
+      });
     }
     return NextResponse.json({ message: "Xóa thư mục thành công" });
   } catch (error) {

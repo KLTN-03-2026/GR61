@@ -17,15 +17,14 @@ export async function POST(req: Request) {
     const oldMessages = await prisma.chatHistory.findMany({
       where: { userId: Number(userId) },
       orderBy: { createdAt: 'asc' },
-      take: 10 
+      take: 5 
     });
 
     const systemInstruction = `Bạn là "Smart Study AI". 
       QUY TẮC PHẢN HỒI:
-      1. Trả lời cực kỳ NGẮN GỌN, súc tích (không quá 3-4 câu).
-      2. Sử dụng gạch đầu dòng (-) cho các bước hướng dẫn thay vì viết đoạn văn dài.
-      3. KHÔNG sử dụng ký hiệu Markdown như ** hoặc # vì giao diện hiện tại không hỗ trợ. Hãy dùng VIẾT HOA các từ quan trọng.
-      4. Luôn giữ phong cách thân thiện, xưng "Tui", gọi "Bro".
+      1. Trả lời cực kỳ NGẮN GỌN, NHANH (không quá 3-4 câu).
+      2. KHÔNG Markdown (** hoặc #). Dùng VIẾT HOA để nhấn mạnh.
+      3. Luôn giữ phong cách thân thiện, xưng "Tui", gọi "Bạn".
   
       HƯỚNG DẪN HỆ THỐNG:
       - Tạo Flashcard: Menu Flashcard -> Nút "Tạo mới" -> Nhập mặt trước/sau -> Lưu.
@@ -34,6 +33,11 @@ export async function POST(req: Request) {
       - Cập nhật họ tên: Biểu tượng người dùng -> Họ tên -> Nhập tên mới -> Lưu.
       - Cập nhật email: Biểu tượng người dùng -> Email -> Nhập email mới -> Lưu.
       - Cập nhật ngày sinh: Biểu tượng người dùng -> Ngày sinh -> Nhập ngày mới -> Lưu.
+
+      HƯỚNG DẪN DỮ LIỆU:
+      - Nếu hỏi về nội dung tài liệu (tóm tắt, tìm thông tin), hãy trả về DUY NHẤT một dòng lệnh SQL theo mẫu:
+        QUERY: SELECT title, content FROM document WHERE userId = ${userId} AND (title LIKE '%tên_file%' OR content LIKE '%từ_khóa%') LIMIT 1
+      - Bảng Document có các cột: id, title, content, userId.
     `;
 
     const chatContent = [
@@ -57,56 +61,50 @@ export async function POST(req: Request) {
     // Xử lý SQL 
     if (aiResponse.includes("QUERY:")) {
       try {
-        let sql = aiResponse.split("QUERY:")[1].trim().replace(/```sql|```/g, "").replace(/;/g, "");
-        const dbData = await prisma.$queryRawUnsafe(sql);
+        let sql = aiResponse.split("QUERY:")[1].trim()
+                   .replace(/```sql|```/g, "")
+                   .replace(/;/g, "");
+        
+        console.log("AI ĐANG TRUY VẤN SQL:", sql);
+        const dbData = await prisma.$queryRawUnsafe(sql) as any[];
+
+        let contextForAI = "";
+        if (!dbData || dbData.length === 0) {
+            contextForAI = "Tui đã tìm trong kho nhưng không thấy tài liệu nào liên quan đến câu hỏi của Bạn.";
+        } else {
+            const title = dbData[0].title || "Không tên";
+            const content = dbData[0].content || "";
+            // Cắt nội dung còn 8000 ký tự để tránh lỗi "Payload Too Large" (413)
+            contextForAI = `NỘI DUNG TỪ FILE "${title}": ${content.substring(0, 8000)}`;
+        }
         
         const res2 = await axios.post(apiUrl, {
           contents: [
             ...chatContent,
             { role: "model", parts: [{ text: aiResponse }] },
-            { role: "user", parts: [{ text: `Dữ liệu thật từ DB: ${JSON.stringify(dbData)}. Hãy dựa vào đây trả lời thân thiện bằng tiếng Việt cho tui.` }] }
+            { role: "user", parts: [{ text: `${contextForAI}\n\nBạn hãy dựa vào nội dung tui vừa tìm được để trả lời câu hỏi ban đầu của tui thật thân thiện và súc tích nhé.` }] }
           ]
         });
         aiResponse = res2.data.candidates[0].content.parts[0].text;
-      } catch (e) {
-        console.error("Lỗi SQL:", e);
-        aiResponse = "Lỗi ";
+      } catch (e: any) {
+        console.error("LỖI SQL HOẶC AI LẦN 2:", e.message);
+        aiResponse = "Tui gặp chút rắc rối khi lục lại bộ nhớ tài liệu. Bạn thử hỏi lại kiểu khác xem!";
       }
     }
-
     // Lưu lịch sử (CreateMany)
     await prisma.chatHistory.createMany({
       data: [
         { userId: Number(userId), role: "user", message: message },
         { userId: Number(userId), role: "model", message: aiResponse }
       ]
-    });
+    })
     // Kiểm tra tổng số tin nhắn của user này
     const chatCount = await prisma.chatHistory.count({
       where: { userId: Number(userId) }
     });
-    // Nếu quá 30 tin nhắn (khoảng 15 cặp chat), xóa các tin nhắn cũ nhất
-    const MAX_MESSAGES = 30;
-    if (chatCount > MAX_MESSAGES) {
-      // Tìm danh sách ID của những tin nhắn cũ vượt quá hạn mức
-      const messagesToDelete = await prisma.chatHistory.findMany({
-        where: { userId: Number(userId) },
-        orderBy: { createdAt: 'asc' },
-        take: chatCount - MAX_MESSAGES,
-        select: { id: true }
-      });
-
-      // Xóa chúng khỏi DB
-      await prisma.chatHistory.deleteMany({
-        where: { id: { in: messagesToDelete.map(m => m.id) } }
-      });
-      console.log(`--- ĐÃ DỌN DẸP: Xóa ${messagesToDelete.length} tin nhắn cũ của User ${userId} ---`);
-    }
-
     return NextResponse.json({ reply: aiResponse });
-
-  } catch (error: any) {
-    console.log("LỖI THẬT:", JSON.stringify(error.response?.data, null, 2));
-    return NextResponse.json({ reply: "Lỗi kết nối AI! Kiểm tra lại Model hoặc API Key nhé." }, { status: 500 });
+    } catch (error: any) {
+    console.log("LỖI TỔNG:", error.response?.data || error.message);
+    return NextResponse.json({ reply: "Server AI đang bận tí bạn ơi, đợi vài giây thử lại nhé!" }, { status: 500 });
   }
 }

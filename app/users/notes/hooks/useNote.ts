@@ -52,7 +52,7 @@ export function useNote() {
       if (!currentPin) {
         notifier.success("Đã ghim!", "Ghi chú sẽ luôn nằm ở đầu danh sách.");
       } else {
-        notifier.info("Bỏ ghim", "Ghi chú đã trở về vị trí cũ.");
+        notifier.success("Bỏ ghim", "Ghi chú đã trở về vị trí cũ.");
       }
     } catch (error) {
       notifier.error("Lỗi!", "Không thể thực hiện thao tác ghim.");

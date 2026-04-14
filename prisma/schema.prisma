@@ -23,6 +23,7 @@ model User {
   hocvien            Hocvien?
   auditLogs          AuditLog[]
   chatHistories      ChatHistory[]
+  notifications      Notification[]
 
   @@map("user")
 }
@@ -176,6 +177,7 @@ model ChatHistory {
 
   @@map("chathistory")
 }
+
 model PasswordResetToken {
   id        Int      @id @default(autoincrement())
   email     String   
@@ -186,6 +188,20 @@ model PasswordResetToken {
   @@index([email])
 }
 
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String   
+  message   String   
+  type      String   @default("INFO") 
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notification")
+}
 enum Todo_priority {
   LOW
   MEDIUM

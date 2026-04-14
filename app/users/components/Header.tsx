@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import useSWR from "swr";
+import NotificationBell from "./NotificationBell";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -24,7 +25,7 @@ export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
   return (
     <header className="h-16 bg-white flex items-center justify-between px-6 z-30 relative shadow-xl border-b-2 border-black/5">
       <div className="flex items-center gap-4">
-        <button
+        <button title="Chọn"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1.5 border-2 border-black rounded-lg hover:bg-slate-50 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[1px] active:translate-y-[1px]"
         >
@@ -41,12 +42,7 @@ export default function Header({ isCollapsed, setIsCollapsed }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="relative p-1.5 border-2 border-black rounded-lg bg-white hover:bg-green-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-y-0.5 transition-all">
-          <Bell size={20} strokeWidth={2.5} />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full text-[8px] text-white flex items-center justify-center font-black">
-            2
-          </span>
-        </button>
+        <NotificationBell />
 
         <Link
           href="/users/profile"

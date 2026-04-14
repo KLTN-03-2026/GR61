@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
+import { notificationService } from "@/lib/notification-service";
 
 export async function GET(req: Request) {
   try {
@@ -66,7 +67,12 @@ export async function PUT(req: Request) {
         type: "INFO" 
       }
     });
-    
+    await notificationService.create({
+      userId: updatedUser.id,
+      title: "HỒ SƠ CẬP NHẬT",
+      message: "Thông tin cá nhân của Bạn đã được thay đổi thành công!",
+      type: "SUCCESS"
+    });
     return NextResponse.json(updatedUser);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

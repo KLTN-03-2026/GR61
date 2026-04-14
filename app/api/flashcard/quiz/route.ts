@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { notificationService } from "@/lib/notification-service";
 
 const shuffle = (array: any[]) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -21,6 +22,7 @@ export async function GET(req: Request) {
     // Kiểm tra xem folder này có thuộc về user đang đăng nhập không [cite: 39]
     const folder = await prisma.flashcardFolder.findFirst({
       where: { id: folderId, userId },
+      include: { user: { select: { hoTen: true } } }
     });
 
     if (!folder) {
@@ -41,6 +43,23 @@ export async function GET(req: Request) {
         { status: 400 },
       );
     }
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        userName: folder.user.hoTen || "Học viên",
+        action: "BẮT ĐẦU KIỂM TRA",
+        table: "flashcard",
+        detail: `Người dùng bắt đầu làm Quiz trong bộ thẻ: ${folder.name}`,
+        type: "INFO",
+      },
+    });
+
+    await notificationService.create({
+      userId,
+      title: "HỌC TẬP CHĂM CHỈ",
+      message: `Bạn vừa bắt đầu bài kiểm tra "${folder.name}". Chúc Bạn đạt điểm cao nhé!`,
+      type: "INFO",
+    });
 
     const quizData = allCards.map((card) => {
       const otherAnswers = allCards

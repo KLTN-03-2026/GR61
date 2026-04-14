@@ -8,7 +8,7 @@ import { X, Copy, ExternalLink, Check } from "lucide-react";
 import { notifier } from "@/lib/notifier";
 
 export default function DocumentPage() {
-  const { documents, addDoc, removeDoc, loading } = useDocument();
+  const { documents, removeDoc, loading, mutate } = useDocument();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -58,7 +58,10 @@ export default function DocumentPage() {
       <UploadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAdd={addDoc}
+        onAdd={() => {
+        if(mutate) mutate(); 
+        else window.location.reload(); // Cách "nông dân" nhưng hiệu quả 100%
+      }}
       />
 
       {previewUrl && (

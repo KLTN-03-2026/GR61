@@ -32,12 +32,7 @@ export function UploadModal({ isOpen, onClose, onAdd }: Props) {
       return;
     }
 
-    onAdd({
-      title: title,
-      fileUrl: fileInfo.url,
-      fileType: fileInfo.type,
-      fileSize: fileInfo.size,
-    });
+    onAdd(null);
 
     setTitle("");
     setFileInfo(null);
@@ -67,12 +62,13 @@ export function UploadModal({ isOpen, onClose, onAdd }: Props) {
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-2">
             <label className="text-[12px] font-black uppercase italic text-slate-500 ml-1">
-              Tiêu đề hiển thị
+              Tên tài liệu
             </label>
             <input
               required
-              className="w-full p-4 border-[3px] border-black rounded-2xl outline-none focus:bg-green-50 focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
-              placeholder="VD: Đồ án tốt nghiệp 2026..."
+              readOnly 
+              className="w-full p-4 border-[3px] border-black rounded-2xl outline-none bg-slate-100 text-slate-500 font-bold italic cursor-not-allowed"
+              placeholder="Tên file..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -87,6 +83,7 @@ export function UploadModal({ isOpen, onClose, onAdd }: Props) {
                 endpoint="documentUploader"
                 onClientUploadComplete={(res) => {
                   if (res && res[0]) {
+                    setTitle(res[0].name);
                     setFileInfo({
                       url: res[0].url,
                       size: (res[0].size / 1024 / 1024).toFixed(2) + " MB",
@@ -99,6 +96,9 @@ export function UploadModal({ isOpen, onClose, onAdd }: Props) {
                     );
                   }
                 }}
+                onUploadProgress={(p) => {
+                console.log("Tiến độ: ", p);
+                 }}
                 onUploadError={(error: Error) => {
                   notifier.error("Lỗi tải lên!", error.message);
                 }}
