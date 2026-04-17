@@ -8,6 +8,7 @@ import {
   Layers, ChevronRight, Loader2, Calendar,
   ArrowUpRight, ChevronLeft
 } from "lucide-react";
+import { notifier } from "@/lib/notifier";
 
 export default function AdminReports() {
   // Tự động set khoảng thời gian 30 ngày gần nhất
@@ -28,7 +29,7 @@ export default function AdminReports() {
     try {
       const res = await axios.get(`/api/admin/reports?start=${dateRange.start}&end=${dateRange.end}`);
       setReportData(res.data);
-      setCurrentPage(1); // Reset về trang 1 khi load dữ liệu mới
+      setCurrentPage(1);
     } catch (err) { 
       console.error("Lỗi lấy dữ liệu báo cáo!"); 
     } finally { 
@@ -36,10 +37,23 @@ export default function AdminReports() {
     }
   }, [dateRange.start, dateRange.end]);
 
+  const handleManualFilter = () => {
+  if (dateRange.start && dateRange.end) {
+    const start = new Date(dateRange.start).setHours(0, 0, 0, 0);
+    const end = new Date(dateRange.end).setHours(0, 0, 0, 0);
+
+    if (end < start) {
+      notifier.error("Lỗi thời gian!", "Ngày kết thúc không được nhỏ hơn ngày bắt đầu");
+      return; 
+    }
+  }
+  fetchReport(); 
+};
+
   // TỰ ĐỘNG CHẠY KHI VÀO TRANG
   useEffect(() => {
     fetchReport();
-  }, [fetchReport]);
+  }, []);
 
   const exportToExcel = () => {
     if (!reportData || !viewDetail) return;
@@ -117,7 +131,7 @@ export default function AdminReports() {
           />
         </div>
         <button 
-          disabled={loading} onClick={fetchReport} 
+          disabled={loading} onClick={handleManualFilter} 
           className="bg-blue-600 text-white p-4 rounded-2xl font-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-700 transition-all flex items-center justify-center gap-3 h-[60px] disabled:opacity-50 active:translate-y-0.5 active:shadow-none uppercase italic"
         >
           {loading ? <Loader2 className="animate-spin" size={24} /> : <Filter size={24} />} Lọc dữ liệu

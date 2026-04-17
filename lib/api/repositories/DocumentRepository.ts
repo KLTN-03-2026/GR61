@@ -18,7 +18,7 @@ async findByUserId(userId: number): Promise<Document[]> {
 async create(data: any): Promise<Document> {
   console.log(">>> [Repo] Dữ liệu nhận vào:", data);
 
-  return this.model.create({
+  const newDoc = await prisma.document.create({
     data: {
       title: data.title,
       fileUrl: data.fileUrl,
@@ -27,6 +27,7 @@ async create(data: any): Promise<Document> {
       userId: Number(data.userId) 
     }
   });
+  return newDoc;
 }
   async delete(id: number) {
     return (this.model as any).delete({

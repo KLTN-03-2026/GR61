@@ -5,7 +5,8 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { message, userId } = await req.json();
+    const { message, userId, role } = await req.json();
+    const isAdmin = role === "ADMIN";
     console.log("--- CHECK DATA ---");
     console.log("User ID:", userId);
     console.log("API Key tồn tại không:", !!process.env.GEMINI_API_KEY);
@@ -19,26 +20,37 @@ export async function POST(req: Request) {
       orderBy: { createdAt: 'asc' },
       take: 5 
     });
+    let systemInstruction = `Bạn là "Smart Study AI". Phong cách: Thân thiện, xưng "Tui", gọi "Bạn".`;
+    if (isAdmin) {
+      systemInstruction += `
+      BẠN ĐANG TRÒ CHUYỆN VỚI QUẢN TRỊ VIÊN.
+      DỮ LIỆU HỆ THỐNG (Bảng User):
+      - Cột vai trò là: vaitro
+      - Giá trị học viên là: 'HocVien'
+      - Giá trị admin là: 'QuanTri'
+      
+      HƯỚNG DẪN TRUY VẤN CHO ADMIN:
+      - Hỏi số học viên: QUERY: SELECT COUNT(*) as total FROM user WHERE vaitro = 'HocVien'
+      - Hỏi số tài liệu: QUERY: SELECT COUNT(*) as total FROM document
+      - Hỏi tài liệu mới nhất: QUERY: SELECT title FROM document ORDER BY createdAt DESC LIMIT 5
+      - Hỏi tên các học viên: QUERY: SELECT hoTen FROM user WHERE vaitro = 'HocVien' LIMIT 10
+      `;
+    } else {
+      systemInstruction += `
+      BẠN ĐANG TRÒ CHUYỆN VỚI HỌC VIÊN.
+      - Bạn KHÔNG ĐƯỢC truy vấn bảng user.
+      - Bạn chỉ được tìm tài liệu của userId = ${userId}.
+      - QUERY: SELECT title, content FROM document WHERE userId = ${userId} AND ...
 
-    const systemInstruction = `Bạn là "Smart Study AI". 
-      QUY TẮC PHẢN HỒI:
-      1. Trả lời cực kỳ NGẮN GỌN, NHANH (không quá 3-4 câu).
-      2. KHÔNG Markdown (** hoặc #). Dùng VIẾT HOA để nhấn mạnh.
-      3. Luôn giữ phong cách thân thiện, xưng "Tui", gọi "Bạn".
-  
       HƯỚNG DẪN HỆ THỐNG:
       - Tạo Flashcard: Menu Flashcard -> Nút "Tạo mới" -> Nhập mặt trước/sau -> Lưu.
       - Tải tài liệu: Menu Tài liệu -> Nút "Tải lên" -> Chọn file từ máy -> Điền tên tài liệu -> Lưu.
       - Cập nhật số điện thoại: Biểu tượng người dùng -> Số điện thoại -> Nhập số mới -> Lưu.
       - Cập nhật họ tên: Biểu tượng người dùng -> Họ tên -> Nhập tên mới -> Lưu.
       - Cập nhật email: Biểu tượng người dùng -> Email -> Nhập email mới -> Lưu.
-      - Cập nhật ngày sinh: Biểu tượng người dùng -> Ngày sinh -> Nhập ngày mới -> Lưu.
-
-      HƯỚNG DẪN DỮ LIỆU:
-      - Nếu hỏi về nội dung tài liệu (tóm tắt, tìm thông tin), hãy trả về DUY NHẤT một dòng lệnh SQL theo mẫu:
-        QUERY: SELECT title, content FROM document WHERE userId = ${userId} AND (title LIKE '%tên_file%' OR content LIKE '%từ_khóa%') LIMIT 1
-      - Bảng Document có các cột: id, title, content, userId.
-    `;
+      - Cập nhật ngày sinh: Biểu tượng người dùng -> Ngày sinh -> Nhập ngày mới -> Lưu.      
+      `;
+    }
 
     const chatContent = [
       ...oldMessages.map(m => ({
@@ -64,6 +76,10 @@ export async function POST(req: Request) {
         let sql = aiResponse.split("QUERY:")[1].trim()
                    .replace(/```sql|```/g, "")
                    .replace(/;/g, "");
+
+        if (!isAdmin && sql.toUpperCase().includes("FROM USER")) {
+        return NextResponse.json({ reply: "Tui chỉ có quyền lục tài liệu học tập của Bạn thôi nè!" });
+      }
         
         console.log("AI ĐANG TRUY VẤN SQL:", sql);
         const dbData = await prisma.$queryRawUnsafe(sql) as any[];

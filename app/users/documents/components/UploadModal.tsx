@@ -34,7 +34,13 @@ export function UploadModal({ isOpen, onClose, onAdd }: Props) {
       return;
     }
 
-    onAdd(null);
+    onAdd({
+    title: title,
+    fileUrl: fileInfo.url,
+    fileType: fileInfo.type,
+    fileSize: fileInfo.size,
+    userName: user?.hoTen 
+  });
 
     setTitle("");
     setFileInfo(null);

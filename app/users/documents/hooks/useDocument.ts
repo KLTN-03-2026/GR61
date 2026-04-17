@@ -10,13 +10,15 @@ export function useDocument() {
   const loadDocs = useCallback(async () => {
     const res: any = await fetchData("GET", "/api/documents");
     if (res) {
-      if (res.data && Array.isArray(res.data)) {
-        setDocuments(res.data);
-      } else if (Array.isArray(res)) {
-        setDocuments(res); // Nếu Backend trả về mảng thuần
-      }
+      const actualData = res.data ? res.data : res;
+      if (Array.isArray(actualData)) {
+      console.log("Danh sách file nhận được:", actualData);
+      setDocuments(actualData);
+      } else {
+      console.error("Dữ liệu không phải mảng:", actualData);
     }
-  }, [fetchData]);
+  }
+}, [fetchData]);
 
   const addDoc = async (docData: any) => {
     try {

@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Lấy thông tin từ Header 
     const userIdStr = req.headers.get("x-user-id");
     let userName = req.headers.get("x-user-name") || "Học viên";
 
@@ -32,36 +31,42 @@ export async function POST(req: NextRequest) {
 
     const userExists = await prisma.user.findUnique({ where: { id: userId } });
     if (!userExists) {
-      console.error("LỖI: User ID này không tồn tại trong DB!");
-      return NextResponse.json({ error: "Người dùng không tồn tại trong hệ thống mới" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Người dùng không tồn tại" },
+        { status: 400 },
+      );
     }
 
     const { userName: nameInBody, ...docData } = body;
+    if (userName === "Học viên" && nameInBody) userName = nameInBody;
 
-    // Nếu header không có tên mà body có (từ useAxios), thì lấy từ body
-    if (userName === "Học viên" && nameInBody) {
-      userName = nameInBody;
-    }
-
+    // 1. Tạo Document
     const newDoc = await service.createDoc({
-      ...docData, // Dùng docData đã lọc, không còn userName thừa
+      ...docData,
       userId: userId,
     });
 
-    // Ghi Audit Log 
+    // 2. Ghi Audit Log (Đưa ra ngoài if hoặc bọc try-catch riêng để chắc chắn chạy)
     if (newDoc) {
-      console.log("Lưu DB thành công file:", newDoc.title);
-      await prisma.auditLog.create({
-        data: {
-          userId: userId,
-          userName: userName, 
-          action: "TẢI TÀI LIỆU",
-          table: "DOCUMENT",
-          detail: `Đã tải lên tài liệu mới: ${newDoc.title}`,
-          type: "SUCCESS", 
-        },
-      });
+      try {
+        await prisma.auditLog.create({
+          data: {
+            userId: userId,
+            userName: userName,
+            action: "TẢI TÀI LIỆU",
+            table: "DOCUMENT",
+            detail: `Đã tải lên tài liệu mới: ${newDoc.title}`,
+            type: "DOCUMENT",
+          },
+        });
+        console.log("ĐÃ GHI AUDIT LOG TẢI FILE!");
+      } catch (e) {
+        console.error("❌ Lỗi ghi log nhưng vẫn cho upload tiếp:", e);
+      }
+    }
 
+    // 3. Thông báo và trả về kết quả
+    if (newDoc) {
       await notificationService.create({
         userId,
         title: "TẢI TÀI LIỆU THÀNH CÔNG",

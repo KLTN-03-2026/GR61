@@ -10,43 +10,33 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (isNaN(docId)) {
       return NextResponse.json({ error: "ID tài liệu không hợp lệ" }, { status: 400 });
     }
+    const userIdStr = req.headers.get("x-user-id");
+    const userId = userIdStr ? Number(userIdStr) : null;
 
-    // 2. Lấy Body để có userId của người xóa
-    let body;
-    try {
-      body = await req.json();
-    } catch (e) {
-      body = {};
-    }
-    const { userId } = body;
-
-    // 3. Tìm tài liệu và Tên người dùng cùng lúc (Dùng Promise.all cho nhanh)
     const [doc, userRecord] = await Promise.all([
       prisma.document.findUnique({ where: { id: docId } }),
       userId ? prisma.user.findUnique({ 
-        where: { id: Number(userId) },
+        where: { id: userId },
         select: { hoTen: true } 
       }) : Promise.resolve(null)
     ]);
 
     if (!doc) {
-      return NextResponse.json({ error: "Tài liệu không thấy đâu cả!" }, { status: 404 });
+      return NextResponse.json({ error: "Tài liệu không tồn tại" }, { status: 404 });
     }
 
-    // 4. Tiến hành xóa
     await prisma.document.delete({ 
       where: { id: docId } 
     });
 
-    // 5. Ghi log với Tên thật lấy từ Database (userRecord.hoTen)
     await prisma.auditLog.create({
       data: {
-        userId: userId ? Number(userId) : null,
+        userId: userId,
         userName: userRecord?.hoTen || "Học viên", 
         action: "XÓA TÀI LIỆU",
         table: "DOCUMENT",
         detail: `Đã xóa tài liệu: ${doc.title}`,
-        type: "DANGER"
+        type: "DOCUMENT" 
       }
     });
 

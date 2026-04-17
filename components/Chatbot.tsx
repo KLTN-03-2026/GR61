@@ -61,9 +61,10 @@ export const ChatAI = () => {
     const user = userStr ? JSON.parse(userStr) : null;
 
     if (!user?.id) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Bro cần đăng nhập để tui biết bro là ai nhé! 🔐" }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Bro cần đăng nhập để tui biết bro là ai nhé!" }]);
       return;
     }
+    const userRole = user.vaiTro === "QuanTri" ? "ADMIN" : "USER";
 
     const userMsg = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
@@ -74,7 +75,7 @@ export const ChatAI = () => {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, userId: user.id }),
+        body: JSON.stringify({ message: input, userId: user.id, role: userRole }),
       });
       
       const data = await res.json();
@@ -84,7 +85,7 @@ export const ChatAI = () => {
         throw new Error(data.reply);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Lỗi kết nối AI rồi bro ơi! Thử lại sau nhé. 😅" }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Lỗi kết nối AI rồi bro ơi! Thử lại sau nhé." }]);
     } finally {
       setLoading(false);
     }
