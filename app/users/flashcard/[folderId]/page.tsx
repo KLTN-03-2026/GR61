@@ -65,7 +65,6 @@ export default function FolderDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* KHỐI LẬT THÈ CÓ NGÔI SAO */}
         <section className="bg-slate-50 p-6 rounded-[32px] border-2 border-black border-dashed relative">
-          {/* Nút ngôi sao trên thẻ chính theo ý Dũng */}
           {cards?.length > 0 && (
             <button
               onClick={() => toggleStar(currentCard.id, currentCard.isStarred)}

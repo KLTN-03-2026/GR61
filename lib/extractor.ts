@@ -1,17 +1,22 @@
-import mammoth from 'mammoth';
+import * as mammoth from "mammoth";
 import prisma from "@/lib/prisma";
 
-// Fix lỗi DOMMatrix cho môi trường Node
+import * as pdf from "pdf-parse";
+
 if (typeof window === "undefined") {
   (global as any).DOMMatrix = class {};
 }
-const pdf = require('pdf-parse');
 
-export async function extractOnlyText(fileUrl: string, fileName: string, fileType: string) {
+export async function extractOnlyText(
+  fileUrl: string,
+  fileName: string,
+  fileType: string,
+) {
   try {
-    console.log(" Đang fetch file từ:", fileUrl);
+    console.log("Đang fetch file từ:", fileUrl);
     const response = await fetch(encodeURI(fileUrl));
     if (!response.ok) throw new Error("Fetch file failed");
+
     const buffer = await response.arrayBuffer();
     const fileBuffer = Buffer.from(buffer);
 
@@ -19,24 +24,30 @@ export async function extractOnlyText(fileUrl: string, fileName: string, fileTyp
     const typeLower = (fileType || "").toLowerCase();
     const nameLower = fileName.toLowerCase();
 
+    // Xử lý PDF
     if (typeLower.includes("pdf") || nameLower.endsWith(".pdf")) {
       console.log("Đang xử lý PDF...");
-      const data = await pdf(fileBuffer, { pagerender: () => "" });
+
+      const data = await (pdf as any)(fileBuffer);
       content = data.text;
-    } 
-    else if (nameLower.endsWith(".docx") || typeLower.includes("word") || typeLower.includes("officedocument") || typeLower === "blob") {
-      console.log("Đang xử lý DOCX...");
+    } else if (
+      nameLower.endsWith(".docx") ||
+      typeLower.includes("word") ||
+      typeLower.includes("officedocument") ||
+      typeLower === "blob"
+    ) {
+      console.log(" Đang xử lý DOCX...");
       const result = await mammoth.extractRawText({ buffer: fileBuffer });
       content = result.value;
+    } else {
+      console.log(" Định dạng không xác định, đọc thô...");
+      content = fileBuffer.toString("utf8").slice(0, 5000);
     }
-     else {
-      console.log("Định dạng không xác định, đọc thô bằng Buffer...");
-      content = fileBuffer.toString('utf8').slice(0, 5000); 
-    }
-    const finalContent = content.replace(/\s+/g, ' ').trim();
+
+    const finalContent = content.replace(/\s+/g, " ").trim();
     return finalContent || "Không có nội dung văn bản.";
   } catch (error: any) {
-    console.error("Lỗi extract:", error.message);
+    console.error(" Lỗi extract:", error.message);
     return "Lỗi trích xuất: " + error.message;
   }
 }

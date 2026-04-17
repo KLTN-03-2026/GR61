@@ -21,14 +21,12 @@ export default function SchedulePage() {
     const baseData = { ...form, backgroundColor: cate?.color || "#16a34a" };
 
     if (popups.add) {
-      // LOGIC: TẠO HÀNG LOẠT TRONG 1 TUẦN (7 NGÀY)
       if (form.days && form.days.length > 0) {
         const recurringEvents: any[] = [];
         const startBase = new Date(form.start);
         const endBase = new Date(form.end);
         const duration = endBase.getTime() - startBase.getTime();
 
-        // Vòng lặp giới hạn trong 7 ngày tới
         for (let i = 0; i < 7; i++) {
           const current = new Date(startBase);
           current.setDate(startBase.getDate() + i);
@@ -86,6 +84,13 @@ export default function SchedulePage() {
           notifier.success("Đã dời lịch!", "Thời gian đã thay đổi.");
         }}
         onDateSelect={(info: any) => {
+          if (info.view.type === "dayGridMonth") {
+            notifier.warn(
+              "Để lịch trình chính xác, hãy chuyển sang chế độ xem Tuần hoặc Ngày để thêm hoạt động nhé! ",
+            );
+            return;
+          }
+
           setForm({
             id: "",
             title: "",

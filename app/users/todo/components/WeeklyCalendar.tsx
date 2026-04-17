@@ -2,7 +2,7 @@
 import React from "react";
 import { useTodoStore } from "@/stores/useTodoStore";
 import { format, addDays, isSameDay } from "date-fns";
-import { vi } from "date-fns/locale"; // Thêm tiếng Việt nếu Dũng muốn
+import { vi } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function WeeklyCalendar() {
@@ -21,7 +21,7 @@ export default function WeeklyCalendar() {
 
   return (
     <div className="w-72 border-black h-full bg-white flex flex-col p-4 no-scrollbar">
-      {/* HEADER: Tuần này */}
+
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-black italic uppercase tracking-tighter font-serif text-black">
           Tuần này
@@ -42,7 +42,6 @@ export default function WeeklyCalendar() {
         </div>
       </div>
 
-      {/* DANH SÁCH NGÀY */}
       <div className="space-y-5">
         {days.map((day) => {
           const active = isSameDay(day, selectedDate);

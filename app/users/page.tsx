@@ -2,8 +2,6 @@
 import React from "react";
 import useSWR from "swr";
 import { useDashboardData } from "./dashboard/hooks/useDashboardData";
-
-// Import 3 mảnh ghép chính
 import DashboardHero from "./dashboard/components/DashboardHero";
 import StatGrid from "./dashboard/components/StatGrid";
 import AiInsights from "./dashboard/components/AiInsights";
@@ -21,11 +19,10 @@ export default function OverviewPage() {
       </div>
     );
 
-  const shortName = profile?.hoTen?.split(" ").pop() || "Dũng";
+  const shortName = profile?.hoTen?.split(" ").pop() || "Bạn";
 
   return (
     <div className="max-w-6xl mx-auto h-full flex flex-col space-y-6 p-4 lg:p-6 no-scrollbar animate-in fade-in duration-700">
-      {/* CỘT TRÊN: HERO & STATS DỌC (Tỷ lệ 62% - 38%) */}
       <div className="flex flex-col lg:flex-row gap-6 items-stretch flex-grow h-0">
         <DashboardHero name={shortName} />
         <StatGrid stats={stats} />

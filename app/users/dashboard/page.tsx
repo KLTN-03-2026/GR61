@@ -25,7 +25,7 @@ export default function OverviewPage() {
       <div className="flex flex-col lg:flex-row gap-8 items-stretch min-h-[450px]">
         {/* HERO SECTION (65%) */}
         <div className="lg:w-[65%] flex">
-          <DashboardHero name={profile?.hoTen?.split(" ").pop() || "Dũng"} />
+          <DashboardHero name={profile?.hoTen?.split(" ").pop() || "Bạn"} />
         </div>
 
         {/* STAT CARDS (35%) */}
@@ -48,7 +48,7 @@ export default function OverviewPage() {
           <div className="italic text-sm font-bold text-green-800 bg-green-50/50 p-5 rounded-2xl border-2 border-dashed border-green-600">
             {stats.todoPending > 0
               ? `${profile?.hoTen?.split(" ").pop()} ơi, còn ${stats.todoPending} nhiệm vụ chưa xong. Cố gắng dứt điểm nhé!`
-              : "Tuyệt vời! Dũng đã hoàn thành mọi mục tiêu."}
+              : "Tuyệt vời! Bạn đã hoàn thành mọi mục tiêu."}
           </div>
           <div className="italic text-sm font-bold text-slate-500 p-5 border-2 border-dashed border-slate-300 rounded-2xl flex items-center">
             Mẹo: Dành 15 phút Flashcard giúp ghi nhớ kiến thức DTU tốt hơn 40%.
