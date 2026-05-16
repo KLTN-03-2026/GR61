@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Có lỗi xảy ra");
 
-      setMessage("Hệ thống đã gửi link đặt lại mật khẩu vào Email của bạn.");
+      setMessage("Hệ thống đã gửi link đặt lại mật khẩu vào Email của bạn");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="mt-4 bg-[rgb(24,71,171)] hover:bg-[rgb(42,95,208)] text-white font-semibold py-3 rounded disabled:opacity-50 transition-colors"
             >
-              {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
+              {loading ? "Đang xử lý...." : "Gửi yêu cầu"}
             </button>
           </form>
 
