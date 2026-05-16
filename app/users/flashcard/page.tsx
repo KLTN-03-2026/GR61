@@ -99,7 +99,7 @@ export default function FlashcardHub() {
         ))}
       </div>
 
-      {/* MODAL ĐA NĂNG (CREATE & EDIT) */}
+      {/* MODAL ĐA NĂNG . (CREATE & EDIT) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white border-[3px] border-black rounded-[32px] p-8 shadow-[10px_10px_0px_0px_#000] w-full max-w-md relative animate-in zoom-in-95 duration-200">
