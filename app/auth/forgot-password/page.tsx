@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Có lỗi xảy ra");
 
-      setMessage("Hệ thống đã gửi link đặt lại mật khẩu vào Email của bạn.");
+      setMessage("Hệ thống đã gửi link đặt lại mật khẩu vào Email của bạn");
     } catch (err: any) {
       setError(err.message);
     } finally {
