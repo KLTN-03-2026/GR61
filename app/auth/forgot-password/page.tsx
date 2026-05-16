@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="mt-4 bg-[rgb(24,71,171)] hover:bg-[rgb(42,95,208)] text-white font-semibold py-3 rounded disabled:opacity-50 transition-colors"
             >
-              {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
+              {loading ? "Đang xử lý...." : "Gửi yêu cầu"}
             </button>
           </form>
 
